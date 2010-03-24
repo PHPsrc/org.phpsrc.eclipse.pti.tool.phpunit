@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PHP Tool PHPUnit
+Bundle-SymbolicName: org.phpsrc.eclipse.pti.tools.phpunit;singleton:=true
+Bundle-Version: 0.3.1.R20100317000000
+Bundle-Activator: org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin
+Bundle-Vendor: Sven Kiera
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.phpsrc.eclipse.pti.core;bundle-version="1.3.0",
+ org.phpsrc.eclipse.pti.library.pear;bundle-version="1.2.0",
+ org.eclipse.core.resources;bundle-version="3.5.0",
+ org.eclipse.php.ui;bundle-version="2.1.0",
+ org.eclipse.ui.ide,
+ org.eclipse.wst.validation,
+ org.eclipse.dltk.core,
+ org.eclipse.php.debug.core;bundle-version="2.1.0",
+ org.eclipse.wst.xml.core;bundle-version="1.1.401",
+ org.eclipse.debug.core;bundle-version="3.5.0",
+ org.eclipse.ui.editors;bundle-version="3.5.0",
+ org.eclipse.compare;bundle-version="3.5.0",
+ org.eclipse.jface.text;bundle-version="3.5.1"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: org.phpsrc.eclipse.pti.tools.phpunit,
+ org.phpsrc.eclipse.pti.tools.phpunit.core,
+ org.phpsrc.eclipse.pti.tools.phpunit.core.launcher,
+ org.phpsrc.eclipse.pti.tools.phpunit.core.model,
+ org.phpsrc.eclipse.pti.tools.phpunit.core.preferences,
+ org.phpsrc.eclipse.pti.tools.phpunit.ui.actions,
+ org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences,
+ org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner,
+ org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards,
+ org.phpsrc.eclipse.pti.tools.phpunit.validator
