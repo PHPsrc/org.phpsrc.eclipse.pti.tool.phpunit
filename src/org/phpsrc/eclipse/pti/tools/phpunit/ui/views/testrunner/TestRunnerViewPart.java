@@ -117,8 +117,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 	public static final String NAME = "org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner"; //$NON-NLS-1$
 
-	private static final String RERUN_LAST_COMMAND = "org.eclipse.jdt.junit.junitShortcut.rerunLast"; //$NON-NLS-1$
-	private static final String RERUN_FAILED_FIRST_COMMAND = "org.eclipse.jdt.junit.junitShortcut.rerunFailedFirst"; //$NON-NLS-1$
+	private static final String RERUN_LAST_COMMAND = "org.eclipse.pti.tools.phpunit.phpunitShortcut.rerunLast"; //$NON-NLS-1$
+	private static final String RERUN_FAILED_FIRST_COMMAND = "org.eclipse.pti.tools.phpunit.phpunitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
 	static final int REFRESH_INTERVAL = 200;
 
@@ -224,22 +224,10 @@ public class TestRunnerViewPart extends ViewPart {
 	static final String TAG_TRACEFILTER = "tracefilter"; //$NON-NLS-1$
 	static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
 	static final String TAG_SCROLL = "scroll"; //$NON-NLS-1$
-	/**
-	 * @since 3.2
-	 */
 	static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
-	/**
-	 * @since 3.2
-	 */
 	static final String TAG_FAILURES_ONLY = "failuresOnly"; //$NON-NLS-1$
-	/**
-	 * @since 3.4
-	 */
 	static final String TAG_SHOW_TIME = "time"; //$NON-NLS-1$
 
-	/**
-	 * @since 3.5
-	 */
 	static final String PREF_LAST_PATH = "lastImportExportPath"; //$NON-NLS-1$
 
 	// orientations
@@ -270,7 +258,7 @@ public class TestRunnerViewPart extends ViewPart {
 	 */
 	private JUnitIsRunningJob fJUnitIsRunningJob;
 	private ILock fJUnitIsRunningLock;
-	public static final Object FAMILY_JUNIT_RUN = new Object();
+	public static final Object FAMILY_PHPUNIT_RUN = new Object();
 
 	private IPartListener2 fPartListener = new IPartListener2() {
 		public void partActivated(IWorkbenchPartReference ref) {
@@ -676,7 +664,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public boolean belongsTo(Object family) {
-			return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
+			return family == TestRunnerViewPart.FAMILY_PHPUNIT_RUN;
 		}
 	}
 
@@ -896,7 +884,7 @@ public class TestRunnerViewPart extends ViewPart {
 		fMemento = memento;
 		IWorkbenchSiteProgressService progressService = getProgressService();
 		if (progressService != null)
-			progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_JUNIT_RUN);
+			progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_PHPUNIT_RUN);
 	}
 
 	private IWorkbenchSiteProgressService getProgressService() {
