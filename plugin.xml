@@ -73,13 +73,7 @@
 				<selection class="org.eclipse.core.resources.IResource"/>
 		</wizard>
 	</extension>
-	<extension point="org.eclipse.ui.perspectiveExtensions">
-		<perspectiveExtension targetID="org.eclipse.php.perspective">
-			<newWizardShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPUnitTestCaseWizard" />
-			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
-		</perspectiveExtension>
-	</extension>
-	
+
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution
 			locationURI="popup:org.phpsrc.eclipse.pti.ui.menus.phptools?after=additions">
@@ -143,5 +137,13 @@
 			category="org.eclipse.php.ui.views"
 			class="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner.TestRunnerViewPart"
 			icon="icons/full/eview16/phpunit.gif" />
+	</extension>
+	
+	<extension point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.php.perspective">
+			<newWizardShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPUnitTestCaseWizard" />
+			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
+			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
+		</perspectiveExtension>
 	</extension>
 </plugin>
