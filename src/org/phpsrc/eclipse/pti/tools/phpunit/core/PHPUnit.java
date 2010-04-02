@@ -78,6 +78,7 @@ public class PHPUnit extends AbstractPHPTool {
 
 	public final static QualifiedName QUALIFIED_NAME = new QualifiedName(PHPUnitPlugin.PLUGIN_ID, "PHPUnit");
 	private final static String PHPUNIT_TEST_SUITE_CLASS = "PHPUnit_Framework_TestSuite";
+	private final static String PHPUNIT_TEST_CASE_CLASS = "PHPUnit_Framework_TestCase";
 	private static PHPUnit instance;
 
 	protected PHPUnit() {
@@ -431,7 +432,7 @@ public class PHPUnit extends AbstractPHPTool {
 		try {
 			IType[] types = module.getAllTypes();
 			if (types.length > 0) {
-				if (PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
+				if (PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_CASE_CLASS))
 					return file;
 
 				SearchMatch[] matches = PHPSearchEngine.findClass(types[0].getElementName() + "Test", PHPSearchEngine
