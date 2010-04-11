@@ -28,6 +28,7 @@ package org.phpsrc.eclipse.pti.tools.phpunit.core;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -91,8 +92,17 @@ public class PHPUnit extends AbstractPHPTool {
 		return instance;
 	}
 
-	public boolean createTestSkeleton(String className, IFile classFile, String testClassFilePath)
-			throws InvalidObjectException, CoreException {
+	public boolean createTestSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath)
+			throws InvalidObjectException, CoreException, InvalidClassException {
+		return createTestSkeleton(className, classFile, testClassName, testClassFilePath, null);
+	}
+
+	public boolean createTestSkeleton(String className, IFile classFile, String testClassName,
+			String testClassFilePath, String superClass) throws InvalidObjectException, CoreException,
+			InvalidClassException {
+		if (superClass == null || "".equals(superClass))
+			superClass = PHPUNIT_TEST_CASE_CLASS;
+
 		Path path = new Path(testClassFilePath);
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		IProject project = file.getProject();
@@ -104,23 +114,17 @@ public class PHPUnit extends AbstractPHPTool {
 
 		String testClassLocation = file.getLocation().toOSString();
 
-		String oldSource = null;
+		PHPClassSourceModifier modifier = null;
 		ArrayList<String> oldMethods = new ArrayList<String>();
 		if (file.exists()) {
 			ISourceModule oldModule = PHPToolkitUtil.getSourceModule(file);
 			IType oldClass = oldModule.getAllTypes()[0];
-			for (IMethod method : oldClass.getMethods()) {
-				if (method.getElementName().startsWith("test")) {
-					oldMethods.add(method.getElementName());
-				}
-			}
-
-			oldSource = oldModule.getSource();
+			modifier = new PHPClassSourceModifier(oldModule, oldClass.getElementName());
 		}
 
 		String cmdLineArgs = "--skeleton-test " + className;
 		cmdLineArgs += " " + OperatingSystem.escapeShellFileArg(classFile.getLocation().toOSString());
-		cmdLineArgs += " " + className + "Test";
+		cmdLineArgs += " " + testClassName;
 		cmdLineArgs += " " + OperatingSystem.escapeShellFileArg(testClassLocation);
 
 		PHPToolLauncher launcher = getProjectPHPToolLauncher(project, cmdLineArgs, classFile.getParent().getLocation());
@@ -131,27 +135,21 @@ public class PHPUnit extends AbstractPHPTool {
 		if (ok) {
 			folder.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 
-			if (oldSource != null) {
+			ISourceModule newModule = PHPToolkitUtil.getSourceModule(file);
+			newModule.reconcile(false, null, new NullProgressMonitor());
+			IType newClass = newModule.getAllTypes()[0];
 
-				StringBuffer newSource = new StringBuffer(oldSource.substring(0, oldSource.lastIndexOf("}")));
+			if (modifier != null) {
 
-				ISourceModule newModule = PHPToolkitUtil.getSourceModule(file);
-				newModule.reconcile(false, null, new NullProgressMonitor());
-
-				IType newClass = newModule.getAllTypes()[0];
 				for (IMethod method : newClass.getMethods()) {
 					if (method.getElementName().startsWith("test")) {
-						if (!oldMethods.contains(method.getElementName())) {
-							newSource.append("\n    " + method.getSource() + "\n");
-						}
+						modifier.addMethod(method);
 					}
 				}
 
-				newSource.append(oldSource.substring(oldSource.lastIndexOf("}")));
-
 				try {
 					FileWriter writer = new FileWriter(file.getLocation().toOSString());
-					writer.write(newSource.toString());
+					writer.write(modifier.getSource());
 					writer.close();
 
 					file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());

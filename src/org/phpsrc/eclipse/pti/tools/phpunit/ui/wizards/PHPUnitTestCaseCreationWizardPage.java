@@ -82,6 +82,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	protected Text fClassPath;
 	protected Text fClassName;
 	protected IFile fClassFile;
+	protected Text fTestClassName;
 	protected Text fContainer;
 	protected Text fFile;
 	protected Text fSuperClass;
@@ -168,13 +169,23 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		// ###### Test ######
 
 		Group fileGroup = new Group(container, SWT.RESIZE);
-		fileGroup.setText("Test");
+		fileGroup.setText("Test Case");
 
 		GridLayout fileLayout = new GridLayout();
 		fileLayout.numColumns = 3;
 		fileLayout.verticalSpacing = 10;
 		fileGroup.setLayout(fileLayout);
 		fileGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		// ### Test Class ###
+
+		Label testClassNameLabel = new Label(fileGroup, SWT.NULL);
+		testClassNameLabel.setText("Class Name:");
+
+		fTestClassName = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		fTestClassName.setLayoutData(gd);
 
 		// ### SuperClass ###
 
@@ -200,6 +211,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		});
 
 		// ### Target Folder ###
+
 		Label fileLabel = new Label(fileGroup, SWT.NULL);
 		fileLabel.setText("Target Folder:");
 		gd = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
@@ -275,6 +287,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		fClassName.setText(type.getElementName());
 		fClassPath.setText(resource.getFullPath().toOSString());
 		fClassFile = (IFile) resource;
+		fTestClassName.setText(type.getElementName() + "Test");
 
 		String patternFolder = null;
 		String patternFile = null;
@@ -558,6 +571,10 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 	public String getTestSuperClass() {
 		return fSuperClass.getText();
+	}
+
+	public String getTestClassName() {
+		return fTestClassName.getText();
 	}
 
 	public IProject getProject() {

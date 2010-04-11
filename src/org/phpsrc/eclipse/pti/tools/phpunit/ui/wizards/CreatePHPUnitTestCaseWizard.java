@@ -27,6 +27,7 @@
 
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards;
 
+import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
 
 import org.eclipse.core.resources.IFile;
@@ -63,7 +64,8 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 			PHPUnit phpunit = PHPUnit.getInstance();
 			try {
 				boolean ok = phpunit.createTestSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
-						.getSourceClassFile(), sourceClassPage.getTestClassFilePath());
+						.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
+						.getTestClassFilePath());
 
 				if (ok) {
 					Path path = new Path(sourceClassPage.getTestClassFilePath());
@@ -79,6 +81,9 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 				e.printStackTrace();
 				Logger.logException(e);
 			} catch (CoreException e) {
+				e.printStackTrace();
+				Logger.logException(e);
+			} catch (InvalidClassException e) {
 				e.printStackTrace();
 				Logger.logException(e);
 			}
