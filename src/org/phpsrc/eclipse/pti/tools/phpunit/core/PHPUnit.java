@@ -152,7 +152,6 @@ public class PHPUnit extends AbstractPHPTool {
 
 					file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
 				} catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
 		}
@@ -232,7 +231,6 @@ public class PHPUnit extends AbstractPHPTool {
 					TestRunSession session = PHPUnitModel.importTestRunSession(summaryFile);
 					notifyResultListener(session);
 				} catch (CoreException e) {
-					e.printStackTrace();
 					Logger.logException(e);
 				}
 				return Status.OK_STATUS;
@@ -446,6 +444,32 @@ public class PHPUnit extends AbstractPHPTool {
 		return null;
 	}
 
+	static public IFile searchTestElement(IFile testCase) {
+		ISourceModule module = PHPToolkitUtil.getSourceModule(testCase);
+		try {
+			IType[] types = module.getAllTypes();
+			if (types.length > 0) {
+				if (!PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_CASE_CLASS))
+					return testCase;
+				String name = types[0].getElementName();
+				name = name.substring(0, name.length() - 4);
+				SearchMatch[] matches = PHPSearchEngine.findClass(name, PHPSearchEngine.createProjectScope(testCase
+						.getProject()));
+
+				if (matches.length > 0)
+					return (IFile) matches[0].getResource();
+			}
+		} catch (ModelException e) {
+			Logger.logException(e);
+		}
+
+		return null;
+	}
+
+	static public boolean isTestCase(IFile file) {
+		return PHPToolkitUtil.hasSuperClass(file, PHPUNIT_TEST_CASE_CLASS);
+	}
+
 	static public boolean isTestSuite(IFile file) {
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
 		if (PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
@@ -478,7 +502,6 @@ public class PHPUnit extends AbstractPHPTool {
 				}
 			}
 		} catch (ModelException e) {
-			e.printStackTrace();
 		}
 
 		return false;

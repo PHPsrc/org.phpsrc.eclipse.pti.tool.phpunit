@@ -66,7 +66,6 @@ public abstract class OpenEditorAction extends Action {
 				if (editor instanceof ITextEditor)
 					reveal((ITextEditor) editor);
 			} catch (PartInitException e) {
-				e.printStackTrace();
 			}
 		}
 	}

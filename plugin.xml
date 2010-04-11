@@ -110,6 +110,11 @@
 			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
 			name="Run PHPUnit Test">
 		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
+			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			name="Toggle Test Case / Test Element">
+		</command>
 	</extension>
 
 	<extension
@@ -127,6 +132,16 @@
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Run PHPUnit Test"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
+				enablesFor="*">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
+				label="Toggle Test Case / Test Element"
+				icon="icons/full/obj16/toggletestcasetestelement.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Toggle Test Case / Test Element"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
 				enablesFor="*">
 			</action>
 		</actionSet>

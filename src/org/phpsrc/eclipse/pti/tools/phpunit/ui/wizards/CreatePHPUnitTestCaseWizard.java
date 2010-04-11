@@ -59,13 +59,10 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 
 				return ok;
 			} catch (InvalidObjectException e) {
-				e.printStackTrace();
 				Logger.logException(e);
 			} catch (CoreException e) {
-				e.printStackTrace();
 				Logger.logException(e);
 			} catch (InvalidClassException e) {
-				e.printStackTrace();
 				Logger.logException(e);
 			}
 		}
