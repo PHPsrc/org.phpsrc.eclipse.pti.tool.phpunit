@@ -553,7 +553,11 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	}
 
 	public String getTestClassFilePath() {
-		return getContainerName() + "\\" + getFileName();
+		return getContainerName() + File.separatorChar + getFileName();
+	}
+
+	public String getTestSuperClass() {
+		return fSuperClass.getText();
 	}
 
 	public IProject getProject() {
