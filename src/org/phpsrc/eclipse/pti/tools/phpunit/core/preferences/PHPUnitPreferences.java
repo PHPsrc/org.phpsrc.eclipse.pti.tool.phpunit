@@ -33,13 +33,15 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 	protected String bootstrap;
 	protected String testFilePatternFolder;
 	protected String testFilePatternFile;
+	protected String testFileSuperClass;
 
 	public PHPUnitPreferences(String phpExecutable, boolean printOutput, String pearLibraryName, String bootstrap,
-			String testFilePatternFolder, String testFilePatternFile) {
+			String testFilePatternFolder, String testFilePatternFile, String testFileSuperClass) {
 		super(phpExecutable, printOutput, pearLibraryName);
 		this.bootstrap = bootstrap;
 		this.testFilePatternFolder = testFilePatternFolder;
 		this.testFilePatternFile = testFilePatternFile;
+		this.testFileSuperClass = testFileSuperClass;
 	}
 
 	public String getBootstrap() {
@@ -52,5 +54,9 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 
 	public String getTestFilePatternFile() {
 		return testFilePatternFile;
+	}
+
+	public String getTestFileSuperClass() {
+		return testFileSuperClass;
 	}
 }

@@ -71,7 +71,6 @@ import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
 import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
@@ -193,7 +192,6 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		superClassLabel.setText("SuperClass:");
 
 		fSuperClass = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
-		fSuperClass.setText(PHPUnit.PHPUNIT_TEST_CASE_CLASS);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		fSuperClass.setLayoutData(gd);
 
@@ -379,6 +377,8 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				}
 			}
 		}
+
+		fSuperClass.setText(preferences.getTestFileSuperClass());
 	}
 
 	/**

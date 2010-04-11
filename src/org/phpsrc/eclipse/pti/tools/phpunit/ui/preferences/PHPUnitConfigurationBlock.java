@@ -46,6 +46,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ResourceSelectionDialog;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
+import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.library.pear.ui.preferences.AbstractPEARPHPToolConfigurationBlock;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
@@ -59,6 +61,7 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 	private static final Key PREF_BOOSTRAP = getPHPUnitKey(PHPUnitPreferenceNames.PREF_BOOTSTRAP);
 	private static final Key PREF_TEST_FILE_PATTERN_FOLDER = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER);
 	private static final Key PREF_TEST_FILE_PATTERN_FILE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
+	private static final Key PREF_TEST_FILE_SUPER_CLASS = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
 
 	public static final String TEST_FILE_PATTERN_FOLDER_DEFAULT = File.separatorChar
 			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT + File.separatorChar + "tests"
@@ -70,6 +73,7 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 	protected Button fFileButton;
 	protected Text fTestFilePatternFolder;
 	protected Text fTestFilePatternFile;
+	protected Text fTestFileSuperClass;
 
 	public PHPUnitConfigurationBlock(IStatusChangeListener context, IProject project,
 			IWorkbenchPreferenceContainer container) {
@@ -78,15 +82,15 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 
 	private static Key[] getKeys() {
 		return new Key[] { PREF_PHP_EXECUTABLE, PREF_PEAR_LIBRARY, PREF_DEBUG_PRINT_OUTPUT, PREF_BOOSTRAP,
-				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE };
+				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE, PREF_TEST_FILE_SUPER_CLASS };
 	}
 
-	
 	protected Composite createToolContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.verticalSpacing = 10;
+		layout.marginWidth = 0;
 		layout.horizontalSpacing = 0;
 		composite.setLayout(layout);
 
@@ -106,15 +110,34 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 
 	private Group createTestFilePatternGroup(Composite folder) {
 		final Group testFilePatternGroup = new Group(folder, SWT.RESIZE);
-		testFilePatternGroup.setText("Test File Pattern");
+		testFilePatternGroup.setText("Test Case");
 
 		final GridLayout testFilePatternLayout = new GridLayout();
 		testFilePatternLayout.numColumns = 3;
 		testFilePatternLayout.verticalSpacing = 9;
 		testFilePatternGroup.setLayout(testFilePatternLayout);
 
+		Label testFileSuperClassLabel = new Label(testFilePatternGroup, SWT.NULL);
+		testFileSuperClassLabel.setText("SuperClass:");
+
+		fTestFileSuperClass = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
+		fTestFileSuperClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		Button fTestFileSuperClassButton = new Button(testFilePatternGroup, SWT.PUSH);
+		fTestFileSuperClassButton.setText("Search...");
+		fTestFileSuperClassButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(getShell(), false);
+				if (dialog.open() == Window.OK) {
+					PHPSearchMatch result = (PHPSearchMatch) dialog.getFirstResult();
+					if (result != null && result.getElement() != null)
+						fTestFileSuperClass.setText(result.getElement().getElementName());
+				}
+			}
+		});
+
 		Label testFilePatternFolderLabel = new Label(testFilePatternGroup, SWT.NULL);
-		testFilePatternFolderLabel.setText("Source Folder:");
+		testFilePatternFolderLabel.setText("Source Folder Pattern:");
 
 		fTestFilePatternFolder = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
 		fTestFilePatternFolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -135,7 +158,7 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		makeFontItalic(testFilePatternFolderInfoLabel);
 
 		Label testFilePatternFileLabel = new Label(testFilePatternGroup, SWT.NULL);
-		testFilePatternFileLabel.setText("File Name:");
+		testFilePatternFileLabel.setText("File Name Pattern:");
 
 		fTestFilePatternFile = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
 		fTestFilePatternFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -198,30 +221,27 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		}
 	}
 
-	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// TODO Auto-generated method stub
 	}
 
-	
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 		clearProjectLauncherCache(PHPUnit.QUALIFIED_NAME);
 
 		setValue(PREF_BOOSTRAP, fBootstrap.getText());
 		setValue(PREF_TEST_FILE_PATTERN_FOLDER, fTestFilePatternFolder.getText());
 		setValue(PREF_TEST_FILE_PATTERN_FILE, fTestFilePatternFile.getText());
+		setValue(PREF_TEST_FILE_SUPER_CLASS, fTestFileSuperClass.getText());
 
 		return super.processChanges(container);
 	}
 
-	
 	public void useProjectSpecificSettings(boolean enable) {
 		super.useProjectSpecificSettings(enable);
 		fBootstrap.setEnabled(enable);
 		fFileButton.setEnabled(enable);
 	}
 
-	
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null;
 	}
@@ -230,17 +250,14 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		return getKey(PHPUnitPlugin.PLUGIN_ID, key);
 	}
 
-	
 	protected Key getPHPExecutableKey() {
 		return PREF_PHP_EXECUTABLE;
 	}
 
-	
 	protected Key getDebugPrintOutputKey() {
 		return PREF_DEBUG_PRINT_OUTPUT;
 	}
 
-	
 	protected Key getPEARLibraryKey() {
 		return PREF_PEAR_LIBRARY;
 	}
@@ -251,7 +268,7 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 	 * @seeorg.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#
 	 * updateControls()
 	 */
-	
+
 	protected void updateControls() {
 		super.updateControls();
 		unpackBootstrap();
@@ -274,5 +291,10 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		if (file == null)
 			file = TEST_FILE_PATTERN_FILE_DEFAULT;
 		fTestFilePatternFile.setText(file);
+
+		String superClass = getValue(PREF_TEST_FILE_SUPER_CLASS);
+		if (superClass == null || "".equals(superClass))
+			superClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
+		fTestFileSuperClass.setText(superClass);
 	}
 }
