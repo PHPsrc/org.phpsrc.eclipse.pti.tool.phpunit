@@ -65,7 +65,7 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 			try {
 				boolean ok = phpunit.createTestSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
 						.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
-						.getTestClassFilePath());
+						.getTestClassFilePath(), sourceClassPage.getTestSuperClass());
 
 				if (ok) {
 					Path path = new Path(sourceClassPage.getTestClassFilePath());

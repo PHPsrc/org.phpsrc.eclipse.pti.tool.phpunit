@@ -55,6 +55,7 @@ import org.eclipse.dltk.core.IField;
 import org.eclipse.dltk.core.IMethod;
 import org.eclipse.dltk.core.IModelElement;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ISourceRange;
 import org.eclipse.dltk.core.IType;
 import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.SearchMatch;
@@ -98,10 +99,10 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	public boolean createTestSkeleton(String className, IFile classFile, String testClassName,
-			String testClassFilePath, String superClass) throws InvalidObjectException, CoreException,
+			String testClassFilePath, String testSuperClass) throws InvalidObjectException, CoreException,
 			InvalidClassException {
-		if (superClass == null || "".equals(superClass))
-			superClass = PHPUNIT_TEST_CASE_CLASS;
+		if (testSuperClass == null || "".equals(testSuperClass))
+			testSuperClass = PHPUNIT_TEST_CASE_CLASS;
 
 		Path path = new Path(testClassFilePath);
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
@@ -115,7 +116,6 @@ public class PHPUnit extends AbstractPHPTool {
 		String testClassLocation = file.getLocation().toOSString();
 
 		PHPClassSourceModifier modifier = null;
-		ArrayList<String> oldMethods = new ArrayList<String>();
 		if (file.exists()) {
 			ISourceModule oldModule = PHPToolkitUtil.getSourceModule(file);
 			IType oldClass = oldModule.getAllTypes()[0];
@@ -139,17 +139,32 @@ public class PHPUnit extends AbstractPHPTool {
 			newModule.reconcile(false, null, new NullProgressMonitor());
 			IType newClass = newModule.getAllTypes()[0];
 
+			String newTestCaseSource = null;
 			if (modifier != null) {
-
 				for (IMethod method : newClass.getMethods()) {
 					if (method.getElementName().startsWith("test")) {
 						modifier.addMethod(method);
 					}
 				}
+				newTestCaseSource = modifier.getSource();
+			} else {
+				String[] superClasses = newClass.getSuperClasses();
+				if (superClasses != null && superClasses.length > 0 && !superClasses[0].equals(testSuperClass)) {
+					newTestCaseSource = newModule.getSource();
+					ISourceRange range = newClass.getSourceRange();
+					String classSource = newClass.getSource();
+					classSource = classSource.replaceFirst("(extends[ \\n\\r]+)" + superClasses[0], "$1"
+							+ testSuperClass);
+					newTestCaseSource = newTestCaseSource.substring(0, range.getOffset()) + classSource
+							+ newTestCaseSource.substring(range.getOffset() + range.getLength());
 
+				}
+			}
+
+			if (newTestCaseSource != null) {
 				try {
 					FileWriter writer = new FileWriter(file.getLocation().toOSString());
-					writer.write(modifier.getSource());
+					writer.write(newTestCaseSource);
 					writer.close();
 
 					file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
