@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -53,10 +54,13 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -67,6 +71,7 @@ import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
 import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
@@ -74,10 +79,12 @@ import org.phpsrc.eclipse.pti.ui.Logger;
 
 public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
-	protected Text classText;
-	protected IFile classFile;
-	protected Text containerText;
-	protected Text fileText;
+	protected Text fClassPath;
+	protected Text fClassName;
+	protected IFile fClassFile;
+	protected Text fContainer;
+	protected Text fFile;
+	protected Text fSuperClass;
 	private IStructuredSelection selection;
 	protected IProject project;
 
@@ -85,7 +92,12 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	protected static final String NO_TEMPLATE = "-- none -- "; //$NON-NLS-1$
 	protected Label targetResourceLabel;
 
+	protected PHPUnitPreferences preferences;
 	protected boolean testFileExists = false;
+
+	private interface IClassSearchListener {
+		public void handleSearchMatch(PHPSearchMatch match);
+	};
 
 	public PHPUnitTestCaseCreationWizardPage(final IStructuredSelection selection) {
 		super("wizardPage"); //$NON-NLS-1$
@@ -97,79 +109,147 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(final Composite parent) {
-		final Composite container = new Composite(parent, SWT.NONE);
+		Composite container = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.verticalSpacing = 10;
 		container.setLayout(layout);
 
-		final Group classGroup = new Group(container, SWT.RESIZE);
+		// ###### Source ######
+
+		Group classGroup = new Group(container, SWT.RESIZE);
 		classGroup.setText("Source");
 
-		final GridLayout classLayout = new GridLayout();
+		GridLayout classLayout = new GridLayout();
 		classLayout.numColumns = 3;
 		classLayout.verticalSpacing = 10;
 		classGroup.setLayout(classLayout);
 		classGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Label classLabel = new Label(classGroup, SWT.NULL);
-		classLabel.setText("Class Name");
+		// ### Source File ###
 
-		classText = new Text(classGroup, SWT.BORDER | SWT.SINGLE);
-		classText.setEditable(false);
+		Label classFolderLabel = new Label(classGroup, SWT.NULL);
+		classFolderLabel.setText("Source File:");
+
+		fClassPath = new Text(classGroup, SWT.BORDER | SWT.SINGLE);
+		fClassPath.setEditable(false);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		classText.setLayoutData(gd);
-		classText.addModifyListener(new ModifyListener() {
+		gd.horizontalSpan = 2;
+		fClassPath.setLayoutData(gd);
+
+		// ### Class to test ###
+
+		Label classLabel = new Label(classGroup, SWT.NULL);
+		classLabel.setText("Class to test:");
+
+		fClassName = new Text(classGroup, SWT.BORDER | SWT.SINGLE);
+		fClassName.setEditable(false);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		fClassName.setLayoutData(gd);
+		fClassName.addModifyListener(new ModifyListener() {
 			public void modifyText(final ModifyEvent e) {
 				dialogChanged();
 			}
 		});
 
-		final Button sourceButton = new Button(classGroup, SWT.PUSH);
+		Button sourceButton = new Button(classGroup, SWT.PUSH);
 		sourceButton.setText("Search...");
 		sourceButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				handleClassSearch();
+				handleClassSearch(new IClassSearchListener() {
+					@Override
+					public void handleSearchMatch(PHPSearchMatch match) {
+						setSourceClass(match);
+					}
+				});
 			}
 		});
 
-		final Group fileGroup = new Group(container, SWT.RESIZE);
+		// ###### Test ######
+
+		Group fileGroup = new Group(container, SWT.RESIZE);
 		fileGroup.setText("Test");
 
-		final GridLayout fileLayout = new GridLayout();
+		GridLayout fileLayout = new GridLayout();
 		fileLayout.numColumns = 3;
 		fileLayout.verticalSpacing = 10;
 		fileGroup.setLayout(fileLayout);
 		fileGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Label fileLabel = new Label(fileGroup, SWT.NULL);
-		fileLabel.setText("Source Folder");
+		// ### SuperClass ###
 
-		containerText = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
+		Label superClassLabel = new Label(fileGroup, SWT.NULL);
+		superClassLabel.setText("SuperClass:");
+
+		fSuperClass = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
+		fSuperClass.setText(PHPUnit.PHPUNIT_TEST_CASE_CLASS);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
-		containerText.setLayoutData(gd);
-		containerText.addModifyListener(new ModifyListener() {
+		fSuperClass.setLayoutData(gd);
+
+		Button superClassButton = new Button(fileGroup, SWT.PUSH);
+		superClassButton.setText("Search...");
+		superClassButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent e) {
+				handleClassSearch(new IClassSearchListener() {
+					@Override
+					public void handleSearchMatch(PHPSearchMatch match) {
+						fSuperClass.setText(match.getElement().getElementName());
+					}
+				});
+			}
+		});
+
+		// ### Target Folder ###
+		Label fileLabel = new Label(fileGroup, SWT.NULL);
+		fileLabel.setText("Target Folder:");
+		gd = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
+		gd.verticalIndent = 4;
+		fileLabel.setLayoutData(gd);
+
+		Composite folderLabelGroup = new Composite(fileGroup, SWT.NULL);
+		layout = new GridLayout();
+		layout.numColumns = 1;
+		layout.verticalSpacing = 0;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		folderLabelGroup.setLayout(layout);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.verticalIndent = 2;
+		folderLabelGroup.setLayoutData(gd);
+
+		fContainer = new Text(folderLabelGroup, SWT.BORDER | SWT.SINGLE);
+		fContainer.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fContainer.addModifyListener(new ModifyListener() {
 			public void modifyText(final ModifyEvent e) {
 				dialogChanged();
 			}
 		});
 
-		final Button containerButton = new Button(fileGroup, SWT.PUSH);
+		Label folderInfoLabel = new Label(folderLabelGroup, SWT.NULL);
+		folderInfoLabel.setText("Path must start with a project like " + File.separatorChar + "<project>"
+				+ File.separatorChar + "<folder 1>" + File.separatorChar + "<folder 2>");
+		folderInfoLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		makeFontItalic(folderInfoLabel);
+
+		Button containerButton = new Button(fileGroup, SWT.PUSH);
 		containerButton.setText("Browse...");
+		containerButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
 		containerButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				handleContainerBrowse();
 			}
 		});
 
-		targetResourceLabel = new Label(fileGroup, SWT.NULL);
-		targetResourceLabel.setText("File Name");
+		// ### File Name ###
 
-		fileText = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
+		targetResourceLabel = new Label(fileGroup, SWT.NULL);
+		targetResourceLabel.setText("File Name:");
+
+		fFile = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
-		fileText.setLayoutData(gd);
-		fileText.addModifyListener(new ModifyListener() {
+		fFile.setLayoutData(gd);
+		fFile.addModifyListener(new ModifyListener() {
 			public void modifyText(final ModifyEvent e) {
 				dialogChanged();
 			}
@@ -178,22 +258,6 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		initialize();
 		dialogChanged();
 		setControl(container);
-
-		if (this.selection != null) {
-			Object element = this.selection.getFirstElement();
-			ISourceModule module = PHPToolkitUtil.getSourceModule(element);
-			if (module != null) {
-				IType[] types;
-				try {
-					types = module.getAllTypes();
-					if (types != null && types.length > 0) {
-						this.setSourceClassName(types[0].getElementName(), types[0].getResource());
-					}
-				} catch (ModelException e1) {
-					Logger.logException(e1);
-				}
-			}
-		}
 	}
 
 	private void setSourceClass(SearchMatch match) {
@@ -205,16 +269,20 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	}
 
 	private void setSourceClass(SourceType type, IResource resource) {
-		classText.setText(type.getElementName());
-		classFile = (IFile) resource;
+		Assert.isNotNull(type);
+		Assert.isNotNull(resource);
+
+		fClassName.setText(type.getElementName());
+		fClassPath.setText(resource.getFullPath().toOSString());
+		fClassFile = (IFile) resource;
 
 		String patternFolder = null;
 		String patternFile = null;
 
-		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(classFile);
-		if (prefs != null) {
-			patternFolder = prefs.getTestFilePatternFolder();
-			patternFile = prefs.getTestFilePatternFile();
+		preferences = PHPUnitPreferencesFactory.factory(fClassFile);
+		if (preferences != null) {
+			patternFolder = preferences.getTestFilePatternFolder();
+			patternFile = preferences.getTestFilePatternFile();
 		}
 
 		if (patternFolder == null)
@@ -224,16 +292,19 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		String patternPath = "";
 
 		String path = type.getPath().toOSString();
-		if (path.indexOf(File.separatorChar, 1) >= 0) {
-			patternProject = path.substring(1, path.indexOf(File.separatorChar, 1));
-			patternPath = path.substring(path.indexOf(File.separatorChar, 1) + 1, path.lastIndexOf(File.separatorChar));
+		int firstSeparator = path.indexOf(File.separatorChar, 1);
+		if (firstSeparator > 0) {
+			patternProject = path.substring(1, firstSeparator);
+			int lastSeparator = path.lastIndexOf(File.separatorChar);
+			if (firstSeparator + 1 < lastSeparator)
+				patternPath = path.substring(firstSeparator + 1, lastSeparator);
 		} else {
 			patternProject = path;
 		}
 
 		patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT, patternProject);
 		patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR, patternPath);
-		containerText.setText(patternFolder);
+		fContainer.setText(patternFolder);
 
 		if (patternFile == null)
 			patternFile = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FILE_DEFAULT;
@@ -245,14 +316,14 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				0, firstDotPos));
 		patternFile = patternFile.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION, fileName
 				.substring(lastDotPos + 1));
-		fileText.setText(patternFile);
+		fFile.setText(patternFile);
 	}
 
 	/**
 	 * Tests if the current workbench selection is a suitable container to use.
 	 */
 	private void initialize() {
-		if (selection != null && selection.isEmpty() == false && selection instanceof IStructuredSelection) {
+		if (selection != null && !selection.isEmpty() && selection instanceof IStructuredSelection) {
 			final IStructuredSelection ssel = (IStructuredSelection) selection;
 			if (ssel.size() > 1) {
 				return;
@@ -273,23 +344,34 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 			}
 
 			if (container != null) {
-				containerText.setText(container.getFullPath().toString());
+				fContainer.setText(container.getFullPath().toOSString());
 				this.project = container.getProject();
 			}
+		} else {
+			preferences = PHPUnitPreferencesFactory.factoryGlobal();
 		}
-	}
 
-	protected void setInitialFileName(final String fileName) {
-		fileText.setText(fileName);
-		// fixed bug 157145 - highlight the newfile word in the file name input
-		fileText.setSelection(0, 7);
+		if (selection != null) {
+			Object element = selection.getFirstElement();
+			ISourceModule module = PHPToolkitUtil.getSourceModule(element);
+			if (module != null) {
+				IType[] types;
+				try {
+					types = module.getAllTypes();
+					if (types != null && types.length > 0) {
+						this.setSourceClassName(types[0].getElementName(), types[0].getResource());
+					}
+				} catch (ModelException e1) {
+					Logger.logException(e1);
+				}
+			}
+		}
 	}
 
 	/**
 	 * Uses the standard container selection dialog to choose the new value for
 	 * the container field.
 	 */
-
 	private void handleContainerBrowse() {
 		final ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), ResourcesPlugin.getWorkspace()
 				.getRoot(), false, "Select Test File Folder");
@@ -297,15 +379,16 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		if (dialog.open() == Window.OK) {
 			final Object[] result = dialog.getResult();
 			if (result.length == 1)
-				containerText.setText(((Path) result[0]).toOSString());
+				fContainer.setText(((Path) result[0]).toOSString());
 		}
 	}
 
-	private void handleClassSearch() {
+	private void handleClassSearch(IClassSearchListener listener) {
 		FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(getShell(), false);
 		if (dialog.open() == Window.OK) {
 			PHPSearchMatch result = (PHPSearchMatch) dialog.getFirstResult();
-			this.setSourceClass(result);
+			if (result != null && result.getElement() != null)
+				listener.handleSearchMatch(result);
 		}
 	}
 
@@ -314,6 +397,16 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	 */
 	protected void dialogChanged() {
 		testFileExists = false;
+
+		if (preferences == null || preferences.getPhpExecutable() == null || "".equals(preferences.getPhpExecutable())) {
+			updateStatus("No preferences found. Please check your PHPUnit configuration.");
+			return;
+		}
+
+		if (fClassFile == null) {
+			updateStatus("No class to test selected");
+			return;
+		}
 
 		final String container = getContainerName();
 		final String fileName = getFileName();
@@ -327,10 +420,16 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		if (containerFolder == null || !containerFolder.exists()) {
 			setMessage("Selected folder does not exist and will be created", WizardPage.INFORMATION);
 		} else {
+			if (containerFolder.getProject() == null) {
+				updateStatus("Project must be specified within Target Folder");
+				return;
+			}
+
 			if (!containerFolder.getProject().isOpen()) {
 				updateStatus("Selected folder is in a closed project");
 				return;
 			}
+
 			if (fileName != null && !fileName.equals("") && containerFolder.getFile(new Path(fileName)).exists()) { //$NON-NLS-1$
 				setMessage("File exists and will be combined", WizardPage.INFORMATION);
 				testFileExists = true;
@@ -338,15 +437,22 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		}
 
 		this.project = null;
-		if (container != null && container.length() > 0 && container.indexOf(java.io.File.separatorChar) >= 0) {
-			IContainer projectContainer = getContainer(container.substring(0, container.indexOf(
-					java.io.File.separatorChar, 1)));
+		String projectName = null;
+		if (container != null && container.length() > 0) {
+			if (container.indexOf(java.io.File.separatorChar, 1) > 0)
+				projectName = container.substring(1, container.indexOf(java.io.File.separatorChar, 1));
+			else
+				projectName = container.substring(1);
+			IContainer projectContainer = getContainer(java.io.File.separatorChar + projectName);
 			if (projectContainer != null)
 				this.project = projectContainer.getProject();
 		}
 
 		if (this.project == null) {
-			updateStatus("Project does not exist");
+			if (projectName != null)
+				updateStatus("Project \"" + projectName + "\" does not exist");
+			else
+				updateStatus("Project must be specified within Target Folder");
 			return;
 		}
 
@@ -416,7 +522,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 		if (matches.length > 0) {
 			for (SearchMatch match : matches) {
-				if (classFile != null || match.getResource().equals(classFile)) {
+				if (classFile == null || match.getResource().equals(classFile)) {
 					setSourceClass(match);
 					return true;
 				}
@@ -431,19 +537,19 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 	}
 
 	public String getSourceClassName() {
-		return classText.getText();
+		return fClassName.getText();
 	}
 
 	public IFile getSourceClassFile() {
-		return classFile;
+		return fClassFile;
 	}
 
 	public String getContainerName() {
-		return containerText.getText();
+		return fContainer.getText();
 	}
 
 	public String getFileName() {
-		return fileText.getText();
+		return fFile.getText();
 	}
 
 	public String getTestClassFilePath() {
@@ -456,5 +562,14 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 	public boolean finish() {
 		return true;
+	}
+
+	protected void makeFontItalic(Control label) {
+		Font font = label.getFont();
+		FontData[] data = font.getFontData();
+		if (data.length > 0) {
+			data[0].setStyle(data[0].getStyle() | SWT.ITALIC);
+		}
+		label.setFont(new Font(font.getDevice(), data));
 	}
 }

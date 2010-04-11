@@ -77,8 +77,8 @@ import org.phpsrc.eclipse.pti.ui.Logger;
 public class PHPUnit extends AbstractPHPTool {
 
 	public final static QualifiedName QUALIFIED_NAME = new QualifiedName(PHPUnitPlugin.PLUGIN_ID, "PHPUnit");
-	private final static String PHPUNIT_TEST_SUITE_CLASS = "PHPUnit_Framework_TestSuite";
-	private final static String PHPUNIT_TEST_CASE_CLASS = "PHPUnit_Framework_TestCase";
+	public final static String PHPUNIT_TEST_SUITE_CLASS = "PHPUnit_Framework_TestSuite";
+	public final static String PHPUNIT_TEST_CASE_CLASS = "PHPUnit_Framework_TestCase";
 	private static PHPUnit instance;
 
 	protected PHPUnit() {

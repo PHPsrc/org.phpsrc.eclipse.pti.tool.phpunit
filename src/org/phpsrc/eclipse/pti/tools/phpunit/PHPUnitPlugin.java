@@ -154,10 +154,10 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped = true;
-		plugin = null;
 		try {
 			fPHPUnitModel.stop();
 		} finally {
+			plugin = null;
 			super.stop(context);
 		}
 	}

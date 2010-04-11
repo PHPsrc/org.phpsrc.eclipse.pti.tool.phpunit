@@ -48,6 +48,10 @@ public class PHPUnitPreferencesFactory {
 		return factory(resource.getProject());
 	}
 
+	public static PHPUnitPreferences factoryGlobal() {
+		return factory((IProject) null);
+	}
+
 	public static PHPUnitPreferences factory(IProject project) {
 		Preferences prefs = PHPUnitPlugin.getDefault().getPluginPreferences();
 
@@ -58,17 +62,20 @@ public class PHPUnitPreferencesFactory {
 		String testFilePatternFile = prefs.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
 		String pearLibraryName = prefs.getString(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY);
 
-		IScopeContext[] preferenceScopes = createPreferenceScopes(project);
-		if (preferenceScopes[0] instanceof ProjectScope) {
-			IEclipsePreferences node = preferenceScopes[0].getNode(PHPUnitPlugin.PLUGIN_ID);
-			if (node != null) {
-				phpExe = node.get(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE, phpExe);
-				printOutput = node.getBoolean(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT, printOutput);
-				bootstrap = node.get(PHPUnitPreferenceNames.PREF_BOOTSTRAP, bootstrap);
-				testFilePatternFolder = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER,
-						testFilePatternFolder);
-				testFilePatternFile = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE, testFilePatternFile);
-				pearLibraryName = node.get(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY, pearLibraryName);
+		if (project != null) {
+			IScopeContext[] preferenceScopes = createPreferenceScopes(project);
+			if (preferenceScopes[0] instanceof ProjectScope) {
+				IEclipsePreferences node = preferenceScopes[0].getNode(PHPUnitPlugin.PLUGIN_ID);
+				if (node != null) {
+					phpExe = node.get(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE, phpExe);
+					printOutput = node.getBoolean(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT, printOutput);
+					bootstrap = node.get(PHPUnitPreferenceNames.PREF_BOOTSTRAP, bootstrap);
+					testFilePatternFolder = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER,
+							testFilePatternFolder);
+					testFilePatternFile = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE,
+							testFilePatternFile);
+					pearLibraryName = node.get(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY, pearLibraryName);
+				}
 			}
 		}
 
