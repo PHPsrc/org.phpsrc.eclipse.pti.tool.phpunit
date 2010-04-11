@@ -375,16 +375,18 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	private PHPToolLauncher getProjectPHPToolLauncher(IProject project, String cmdLineArgs, IPath fileIncludePath) {
-
 		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(project);
 
 		String bootstrap = prefs.getBootstrap();
 		if (bootstrap != null && bootstrap.length() > 0) {
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IResource resource = root.findMember(bootstrap);
-			if (resource.exists()) {
-				cmdLineArgs = "--bootstrap " + OperatingSystem.escapeShellFileArg(resource.getLocation().toOSString())
-						+ " " + cmdLineArgs;
+			if (root != null) {
+				IResource resource = root.findMember(bootstrap);
+				if (resource != null && resource.exists() && resource.getLocation() != null) {
+					cmdLineArgs = "--bootstrap "
+							+ OperatingSystem.escapeShellFileArg(resource.getLocation().toOSString()) + " "
+							+ cmdLineArgs;
+				}
 			}
 		}
 
