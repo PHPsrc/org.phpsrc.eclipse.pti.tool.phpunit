@@ -322,7 +322,7 @@ public class PHPUnit extends AbstractPHPTool {
 
 					String lineFailureLocation = null;
 					for (int x = 1; x >= 0; --x) {
-						if (lines[i + x].lastIndexOf(':') != -1) {
+						if (lines.length > i + x && lines[i + x].lastIndexOf(':') != -1) {
 							lineFailureLocation = lines[i + x];
 							break;
 						}
