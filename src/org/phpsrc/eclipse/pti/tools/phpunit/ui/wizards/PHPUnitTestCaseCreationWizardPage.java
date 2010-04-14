@@ -138,7 +138,6 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		sourceButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				handleClassSearch(new IClassSearchListener() {
-					@Override
 					public void handleSearchMatch(PHPSearchMatch match) {
 						setSourceClass(match);
 					}
@@ -181,7 +180,6 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		superClassButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				handleClassSearch(new IClassSearchListener() {
-					@Override
 					public void handleSearchMatch(PHPSearchMatch match) {
 						fSuperClass.setText(match.getElement().getElementName());
 					}
