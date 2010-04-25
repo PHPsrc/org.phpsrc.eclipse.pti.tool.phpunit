@@ -77,14 +77,14 @@ public class PHPUnit extends AbstractPHPTool {
 		return instance;
 	}
 
-	public boolean createTestSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath)
-			throws InvalidObjectException, CoreException, InvalidClassException {
-		return createTestSkeleton(className, classFile, testClassName, testClassFilePath, null);
+	public void createTestSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath)
+			throws InvalidObjectException, CoreException, InvalidClassException, PHPUnitException {
+		createTestSkeleton(className, classFile, testClassName, testClassFilePath, null);
 	}
 
-	public boolean createTestSkeleton(String className, IFile classFile, String testClassName,
-			String testClassFilePath, String testSuperClass) throws InvalidObjectException, CoreException,
-			InvalidClassException {
+	public void createTestSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath,
+			String testSuperClass) throws InvalidObjectException, CoreException, InvalidClassException,
+			PHPUnitException {
 		if (testSuperClass == null || "".equals(testSuperClass))
 			testSuperClass = PHPUNIT_TEST_CASE_CLASS;
 
@@ -141,7 +141,6 @@ public class PHPUnit extends AbstractPHPTool {
 							+ testSuperClass);
 					newTestCaseSource = newTestCaseSource.substring(0, range.getOffset()) + classSource
 							+ newTestCaseSource.substring(range.getOffset() + range.getLength());
-
 				}
 			}
 
@@ -155,9 +154,16 @@ public class PHPUnit extends AbstractPHPTool {
 				} catch (IOException e) {
 				}
 			}
-		}
+		} else {
+			StringBuffer failures = new StringBuffer();
 
-		return ok;
+			Matcher m = Pattern.compile("Fatal error: .*").matcher(output);
+			while (m.find()) {
+				failures.append(m.group(0));
+			}
+
+			throw new PHPUnitException(failures.toString());
+		}
 	}
 
 	public IProblem[] runTestCase(final IFile testFile) {

@@ -17,6 +17,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IEditorInput;
@@ -26,7 +27,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitException;
 import org.phpsrc.eclipse.pti.ui.Logger;
 
 public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
@@ -44,20 +47,23 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 		if (sourceClassPage.finish()) {
 			PHPUnit phpunit = PHPUnit.getInstance();
 			try {
-				boolean ok = phpunit.createTestSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
-						.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
-						.getTestClassFilePath(), sourceClassPage.getTestSuperClass());
+				try {
+					phpunit.createTestSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
+							.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
+							.getTestClassFilePath(), sourceClassPage.getTestSuperClass());
 
-				if (ok) {
 					Path path = new Path(sourceClassPage.getTestClassFilePath());
 					IFile testFile = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 					IEditorInput editorInput = new FileEditorInput(testFile);
 					IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 					IWorkbenchPage page = window.getActivePage();
 					page.openEditor(editorInput, page.getActiveEditor().getSite().getId());
-				}
 
-				return ok;
+					return true;
+				} catch (PHPUnitException e) {
+					MessageDialog.openError(PHPToolCorePlugin.getActiveWorkbenchShell(),
+							"Failed creating PHPUnit Test Case", e.getMessage());
+				}
 			} catch (InvalidObjectException e) {
 				Logger.logException(e);
 			} catch (CoreException e) {
