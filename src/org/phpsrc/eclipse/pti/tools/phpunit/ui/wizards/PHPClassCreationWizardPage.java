@@ -9,6 +9,8 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards;
 
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -52,13 +54,14 @@ import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
 import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
 import org.phpsrc.eclipse.pti.ui.Logger;
 
 @SuppressWarnings("restriction")
-public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
+public class PHPClassCreationWizardPage extends WizardPage {
 
 	protected Text fClassPath;
 	protected Text fClassName;
@@ -81,7 +84,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		public void handleSearchMatch(PHPSearchMatch match);
 	};
 
-	public PHPUnitTestCaseCreationWizardPage(final IStructuredSelection selection) {
+	public PHPClassCreationWizardPage(final IStructuredSelection selection) {
 		super("wizardPage"); //$NON-NLS-1$
 		setTitle("New PHPUnit Test Case");
 		this.selection = selection;
@@ -122,7 +125,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		// ### Class to test ###
 
 		Label classLabel = new Label(classGroup, SWT.NULL);
-		classLabel.setText("Class to test:");
+		classLabel.setText("Test Class:");
 
 		fClassName = new Text(classGroup, SWT.BORDER | SWT.SINGLE);
 		fClassName.setEditable(false);
@@ -140,7 +143,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 			public void widgetSelected(final SelectionEvent e) {
 				handleClassSearch(new IClassSearchListener() {
 					public void handleSearchMatch(PHPSearchMatch match) {
-						setSourceClass(match);
+						setTestCaseClass(match);
 					}
 				});
 			}
@@ -149,7 +152,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		// ###### Test ######
 
 		Group fileGroup = new Group(container, SWT.RESIZE);
-		fileGroup.setText("Test Case");
+		fileGroup.setText("PHP Class");
 
 		GridLayout fileLayout = new GridLayout();
 		fileLayout.numColumns = 3;
@@ -250,64 +253,85 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		setControl(container);
 	}
 
-	private void setSourceClass(SearchMatch match) {
-		setSourceClass((SourceType) match.getElement(), match.getResource());
+	private void setTestCaseClass(SearchMatch match) {
+		setTestCaseClass((SourceType) match.getElement(), match.getResource());
 	}
 
-	private void setSourceClass(PHPSearchMatch match) {
-		setSourceClass(match.getElement(), match.getResource());
+	private void setTestCaseClass(PHPSearchMatch match) {
+		setTestCaseClass(match.getElement(), match.getResource());
 	}
 
-	private void setSourceClass(SourceType type, IResource resource) {
+	private void setTestCaseClass(SourceType type, IResource resource) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(resource);
 
-		fClassName.setText(type.getElementName());
-		fClassPath.setText(resource.getFullPath().toOSString());
-		fClassFile = (IFile) resource;
-		fTestClassName.setText(type.getElementName() + "Test");
+		if (resource instanceof IFile && PHPUnit.isTestCase((IFile) resource)) {
+			fClassName.setText(type.getElementName());
+			fClassPath.setText(resource.getFullPath().toOSString());
+			fClassFile = (IFile) resource;
 
-		String patternFolder = null;
-		String patternFile = null;
+			String className = type.getElementName();
+			if (className.endsWith("Test"))
+				className = className.substring(0, className.length() - 4);
+			fTestClassName.setText(className);
 
-		preferences = PHPUnitPreferencesFactory.factory(fClassFile);
-		if (preferences != null) {
-			patternFolder = preferences.getTestFilePatternFolder();
-			patternFile = preferences.getTestFilePatternFile();
+			String patternFolder = null;
+			String patternFile = null;
+
+			preferences = PHPUnitPreferencesFactory.factory(fClassFile);
+			if (preferences != null) {
+				patternFolder = preferences.getTestFilePatternFolder();
+				patternFile = preferences.getTestFilePatternFile();
+			}
+
+			if (patternFolder == null)
+				patternFolder = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FOLDER_DEFAULT;
+
+			String patternProject = "";
+			String patternPath = "";
+
+			String path = type.getPath().toOSString();
+			int firstSeparator = path.indexOf(File.separatorChar, 1);
+			if (firstSeparator > 0) {
+				patternProject = path.substring(1, firstSeparator);
+				int lastSeparator = path.lastIndexOf(File.separatorChar);
+				if (firstSeparator + 1 < lastSeparator)
+					patternPath = path.substring(firstSeparator + 1, lastSeparator);
+			} else {
+				patternProject = path;
+			}
+
+			String targetFolder = File.separatorChar + patternProject + File.separatorChar + patternPath;
+
+			patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT, "([^"
+					+ File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
+			patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR, "(.+)"); //$NON-NLS-1$
+			patternFolder = patternFolder.replace("\\", "\\\\"); //$NON-NLS-1$  //$NON-NLS-2$
+			Pattern p = Pattern.compile(patternFolder);
+			Matcher m = p.matcher(targetFolder);
+			if (m.matches()) {
+				targetFolder = File.separatorChar + m.group(1) + File.separatorChar + m.group(2);
+			}
+
+			fContainer.setText(targetFolder);
+
+			if (patternFile == null)
+				patternFile = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FILE_DEFAULT;
+
+			String fileName = resource.getName();
+
+			patternFile = patternFile.replace(".", "\\."); //$NON-NLS-1$ //$NON-NLS-2$
+			patternFile = patternFile.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME, "(.+)"); //$NON-NLS-1$
+			patternFile = patternFile
+					.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION, "([^.]+)"); //$NON-NLS-1$
+			p = Pattern.compile(patternFile);
+			m = p.matcher(fileName);
+			if (m.matches()) {
+				fileName = m.group(1) + "." + m.group(2); //$NON-NLS-1$
+			}
+
+			fFile.setText(fileName);
 		}
-
-		if (patternFolder == null)
-			patternFolder = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FOLDER_DEFAULT;
-
-		String patternProject = "";
-		String patternPath = "";
-
-		String path = type.getPath().toOSString();
-		int firstSeparator = path.indexOf(File.separatorChar, 1);
-		if (firstSeparator > 0) {
-			patternProject = path.substring(1, firstSeparator);
-			int lastSeparator = path.lastIndexOf(File.separatorChar);
-			if (firstSeparator + 1 < lastSeparator)
-				patternPath = path.substring(firstSeparator + 1, lastSeparator);
-		} else {
-			patternProject = path;
-		}
-
-		patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT, patternProject);
-		patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR, patternPath);
-		fContainer.setText(patternFolder);
-
-		if (patternFile == null)
-			patternFile = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FILE_DEFAULT;
-
-		String fileName = resource.getName();
-		int firstDotPos = fileName.indexOf(".");
-		int lastDotPos = fileName.lastIndexOf(".");
-		patternFile = patternFile.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME, fileName.substring(
-				0, firstDotPos));
-		patternFile = patternFile.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION, fileName
-				.substring(lastDotPos + 1));
-		fFile.setText(patternFile);
 	}
 
 	/**
@@ -350,15 +374,13 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				try {
 					types = module.getAllTypes();
 					if (types != null && types.length > 0) {
-						this.setSourceClassName(types[0].getElementName(), types[0].getResource());
+						setTestCaseClassName(types[0].getElementName(), types[0].getResource());
 					}
 				} catch (ModelException e1) {
 					Logger.logException(e1);
 				}
 			}
 		}
-
-		fSuperClass.setText(preferences.getTestFileSuperClass());
 	}
 
 	/**
@@ -498,31 +520,31 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		setPageComplete(message == null);
 	}
 
-	public boolean setSourceClassName(String className) {
-		return setSourceClassName(className, PHPSearchEngine.createWorkspaceScope(), null);
+	public boolean setTestCaseClassName(String className) {
+		return setTestCaseClassName(className, PHPSearchEngine.createWorkspaceScope(), null);
 	}
 
-	public boolean setSourceClassName(String className, IResource classFile) {
-		return setSourceClassName(className, PHPSearchEngine.createProjectScope(classFile.getProject()), classFile);
+	public boolean setTestCaseClassName(String className, IResource classFile) {
+		return setTestCaseClassName(className, PHPSearchEngine.createProjectScope(classFile.getProject()), classFile);
 	}
 
-	public boolean setSourceClassName(String className, IDLTKSearchScope scope) {
-		return setSourceClassName(className, scope, null);
+	public boolean setTestCaseClassName(String className, IDLTKSearchScope scope) {
+		return setTestCaseClassName(className, scope, null);
 	}
 
-	protected boolean setSourceClassName(String className, IDLTKSearchScope scope, IResource classFile) {
+	protected boolean setTestCaseClassName(String className, IDLTKSearchScope scope, IResource classFile) {
 		SearchMatch[] matches = PHPSearchEngine.findClass(className, scope);
 
 		if (matches.length > 0) {
 			for (SearchMatch match : matches) {
 				if (classFile == null || match.getResource().equals(classFile)) {
-					setSourceClass(match);
+					setTestCaseClass(match);
 					return true;
 				}
 			}
 
 			// no file found, so use first match
-			setSourceClass(matches[0]);
+			setTestCaseClass(matches[0]);
 			return true;
 		}
 
@@ -545,11 +567,11 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		return fFile.getText();
 	}
 
-	public String getTestClassFilePath() {
+	public String getPHPClassFilePath() {
 		return getContainerName() + File.separatorChar + getFileName();
 	}
 
-	public String getTestSuperClass() {
+	public String getPHPClassSuperClass() {
 		return fSuperClass.getText();
 	}
 

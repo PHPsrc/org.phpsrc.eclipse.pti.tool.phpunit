@@ -9,6 +9,7 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.core.preferences;
 
 import org.phpsrc.eclipse.pti.library.pear.core.preferences.AbstractPEARPHPToolPreferences;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 
 public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 	protected String bootstrap;
@@ -23,6 +24,8 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 		this.testFilePatternFolder = testFilePatternFolder;
 		this.testFilePatternFile = testFilePatternFile;
 		this.testFileSuperClass = testFileSuperClass;
+		if (this.testFileSuperClass == null || "".equals(this.testFileSuperClass))
+			this.testFileSuperClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
 	}
 
 	public String getBootstrap() {

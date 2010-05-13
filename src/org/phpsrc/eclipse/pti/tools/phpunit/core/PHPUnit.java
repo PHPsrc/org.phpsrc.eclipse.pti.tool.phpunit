@@ -77,6 +77,92 @@ public class PHPUnit extends AbstractPHPTool {
 		return instance;
 	}
 
+	public void createPHPClassSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath)
+			throws InvalidObjectException, CoreException, InvalidClassException, PHPUnitException {
+		createPHPClassSkeleton(className, classFile, testClassName, testClassFilePath, null);
+	}
+
+	public void createPHPClassSkeleton(String className, IFile classFile, String testClassName,
+			String testClassFilePath, String testSuperClass) throws InvalidObjectException, CoreException,
+			InvalidClassException, PHPUnitException {
+
+		Path path = new Path(testClassFilePath);
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+		IProject project = file.getProject();
+		if (project == null)
+			throw new InvalidObjectException("no project found");
+
+		IFolder folder = (IFolder) file.getParent();
+		createFolder(folder);
+
+		String testClassLocation = file.getLocation().toOSString();
+
+		PHPClassSourceModifier modifier = null;
+		if (file.exists()) {
+			ISourceModule oldModule = PHPToolkitUtil.getSourceModule(file);
+			IType oldClass = oldModule.getAllTypes()[0];
+			modifier = new PHPClassSourceModifier(oldModule, oldClass.getElementName());
+		}
+
+		String cmdLineArgs = "--skeleton-class " + className;
+		cmdLineArgs += " " + OperatingSystem.escapeShellFileArg(classFile.getLocation().toOSString());
+		cmdLineArgs += " " + testClassName;
+		cmdLineArgs += " " + OperatingSystem.escapeShellFileArg(testClassLocation);
+
+		PHPToolLauncher launcher = getProjectPHPToolLauncher(project, cmdLineArgs, classFile.getParent().getLocation());
+		String output = launcher.launch(project);
+
+		boolean ok = (output.indexOf("Wrote skeleton for ") >= 0 ? true : false);
+
+		if (ok) {
+			folder.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+
+			ISourceModule newModule = PHPToolkitUtil.getSourceModule(file);
+			newModule.reconcile(false, null, new NullProgressMonitor());
+			IType newClass = newModule.getAllTypes()[0];
+
+			String newTestCaseSource = null;
+			if (modifier != null) {
+				for (IMethod method : newClass.getMethods()) {
+					modifier.addMethod(method);
+				}
+				newTestCaseSource = modifier.getSource();
+			} else {
+				String[] superClasses = newClass.getSuperClasses();
+				if (superClasses != null && superClasses.length > 0 && !superClasses[0].equals(testSuperClass)) {
+					newTestCaseSource = newModule.getSource();
+					ISourceRange range = newClass.getSourceRange();
+					String classSource = newClass.getSource();
+					classSource = classSource.replaceFirst("(extends[ \\n\\r]+)" + superClasses[0], "$1"
+							+ testSuperClass);
+					newTestCaseSource = newTestCaseSource.substring(0, range.getOffset()) + classSource
+							+ newTestCaseSource.substring(range.getOffset() + range.getLength());
+				}
+			}
+
+			if (newTestCaseSource != null) {
+				try {
+					FileWriter writer = new FileWriter(file.getLocation().toOSString());
+					writer.write(newTestCaseSource);
+					writer.close();
+
+					file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
+				} catch (IOException e) {
+				}
+			}
+		} else {
+			StringBuffer failures = new StringBuffer();
+
+			Matcher m = Pattern.compile("Fatal error: .*").matcher(output);
+			while (m.find()) {
+				failures.append(m.group(0));
+			}
+
+			throw new PHPUnitException(failures.toString());
+		}
+
+	}
+
 	public void createTestSkeleton(String className, IFile classFile, String testClassName, String testClassFilePath)
 			throws InvalidObjectException, CoreException, InvalidClassException, PHPUnitException {
 		createTestSkeleton(className, classFile, testClassName, testClassFilePath, null);

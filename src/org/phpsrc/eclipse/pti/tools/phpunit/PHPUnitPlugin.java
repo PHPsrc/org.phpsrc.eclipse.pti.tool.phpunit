@@ -134,6 +134,14 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	 * )
 	 */
 	public void stop(BundleContext context) throws Exception {
+		try {
+			for (File file : getHistoryDirectory().listFiles()) {
+				if (file.isFile())
+					file.delete();
+			}
+		} catch (Exception e) {
+		}
+
 		fIsStopped = true;
 		try {
 			fPHPUnitModel.stop();

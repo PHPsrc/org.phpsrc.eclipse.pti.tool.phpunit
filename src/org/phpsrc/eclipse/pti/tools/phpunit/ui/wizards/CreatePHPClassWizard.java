@@ -33,13 +33,13 @@ import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitException;
 import org.phpsrc.eclipse.pti.ui.Logger;
 
 @SuppressWarnings("restriction")
-public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
+public class CreatePHPClassWizard extends Wizard implements INewWizard {
 
 	private IWorkbench workbench;
 	private IStructuredSelection selection;
-	private PHPUnitTestCaseCreationWizardPage sourceClassPage;
+	private PHPClassCreationWizardPage sourceClassPage;
 
-	public CreatePHPUnitTestCaseWizard() {
+	public CreatePHPClassWizard() {
 		super();
 		setNeedsProgressMonitor(true);
 	}
@@ -49,11 +49,11 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 			PHPUnit phpunit = PHPUnit.getInstance();
 			try {
 				try {
-					phpunit.createTestSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
+					phpunit.createPHPClassSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
 							.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
-							.getTestClassFilePath(), sourceClassPage.getTestSuperClass());
+							.getPHPClassFilePath(), sourceClassPage.getPHPClassSuperClass());
 
-					Path path = new Path(sourceClassPage.getTestClassFilePath());
+					Path path = new Path(sourceClassPage.getPHPClassFilePath());
 					IFile testFile = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 					IEditorInput editorInput = new FileEditorInput(testFile);
 					IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
@@ -62,8 +62,8 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 
 					return true;
 				} catch (PHPUnitException e) {
-					MessageDialog.openError(PHPToolCorePlugin.getActiveWorkbenchShell(),
-							"Failed creating PHPUnit Test Case", e.getMessage());
+					MessageDialog.openError(PHPToolCorePlugin.getActiveWorkbenchShell(), "Failed creating PHP Class", e
+							.getMessage());
 				}
 			} catch (InvalidObjectException e) {
 				Logger.logException(e);
@@ -83,19 +83,19 @@ public class CreatePHPUnitTestCaseWizard extends Wizard implements INewWizard {
 	}
 
 	public void addPages() {
-		sourceClassPage = new PHPUnitTestCaseCreationWizardPage(selection);
+		sourceClassPage = new PHPClassCreationWizardPage(selection);
 		addPage(sourceClassPage);
 	}
 
-	public boolean setSourceClassName(String className) {
-		return sourceClassPage.setSourceClassName(className);
+	public boolean setTestCaseClassName(String className) {
+		return sourceClassPage.setTestCaseClassName(className);
 	}
 
-	public boolean setSourceClassName(String className, IDLTKSearchScope scope) {
-		return sourceClassPage.setSourceClassName(className, scope);
+	public boolean setTestCaseClassName(String className, IDLTKSearchScope scope) {
+		return sourceClassPage.setTestCaseClassName(className, scope);
 	}
 
-	public boolean setSourceClassName(String className, IResource classFile) {
-		return sourceClassPage.setSourceClassName(className, classFile);
+	public boolean setTestCaseClassName(String className, IResource classFile) {
+		return sourceClassPage.setTestCaseClassName(className, classFile);
 	}
 }

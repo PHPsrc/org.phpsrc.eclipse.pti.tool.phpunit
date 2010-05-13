@@ -72,6 +72,15 @@
 				<description>Create a PHPUnit Test Case</description>
 				<selection class="org.eclipse.core.resources.IResource"/>
 		</wizard>
+		<wizard
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPClassWizard"
+			name="PHP Class from PHPUnit Test Case"
+			class="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPClassWizard"
+			category="org.eclipse.php.project.ui/org.phpsrc.eclipse.tools.phpunit.wizards"
+			icon="icons/full/obj16/add_php_file.gif">
+				<description>Create a PHP Class from a PHPUnit Test Case</description>
+				<selection class="org.eclipse.core.resources.IResource"/>
+		</wizard>
 	</extension>
 
 	<extension point="org.eclipse.ui.menus">
@@ -157,6 +166,7 @@
 	<extension point="org.eclipse.ui.perspectiveExtensions">
 		<perspectiveExtension targetID="org.eclipse.php.perspective">
 			<newWizardShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPUnitTestCaseWizard" />
+			<newWizardShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPClassWizard" />
 			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
 			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
 		</perspectiveExtension>
