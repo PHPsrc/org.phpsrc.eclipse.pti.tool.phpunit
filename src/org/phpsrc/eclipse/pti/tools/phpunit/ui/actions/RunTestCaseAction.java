@@ -7,6 +7,7 @@
  *******************************************************************************/
 
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.actions;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -20,7 +21,6 @@ import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.validator.PHPUnitValidator;
 import org.phpsrc.eclipse.pti.ui.Logger;
 import org.phpsrc.eclipse.pti.ui.actions.ResourceAction;
-
 
 public class RunTestCaseAction extends ResourceAction {
 
@@ -47,7 +47,7 @@ public class RunTestCaseAction extends ResourceAction {
 							} else {
 								IFile testCaseFile = PHPUnit.searchTestCase(file);
 								if (testCaseFile != null) {
-									validator.validateTestCase(file);
+									validator.validateTestCase(testCaseFile);
 								} else {
 									Logger.logToConsole("Error: No test case / test suite found for file "
 											+ file.getProjectRelativePath().toString());
