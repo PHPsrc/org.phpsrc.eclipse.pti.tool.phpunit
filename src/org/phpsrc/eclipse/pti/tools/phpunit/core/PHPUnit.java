@@ -190,7 +190,7 @@ public class PHPUnit extends AbstractPHPTool {
 		} else {
 			StringBuffer failures = new StringBuffer();
 
-			Matcher m = Pattern.compile("Fatal error: .*").matcher(output);
+			Matcher m = Pattern.compile("[^:]+ error: .*").matcher(output);
 			while (m.find()) {
 				failures.append(m.group(0));
 			}
