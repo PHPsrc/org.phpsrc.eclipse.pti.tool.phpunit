@@ -207,15 +207,22 @@ public class PHPUnit extends AbstractPHPTool {
 			IType[] types = module.getAllTypes();
 			for (IType type : types) {
 				String cmdLineArgs = "--log-junit " + OperatingSystem.escapeShellFileArg(summaryFile.toString());
+
+				cmdLineArgs = "--log-json php://stdout";
+
 				cmdLineArgs += " " + type.getElementName();
 				cmdLineArgs += " " + OperatingSystem.escapeShellFileArg(testFile.getLocation().toOSString());
 
 				PHPToolLauncher launcher = getProjectPHPToolLauncher(testFile.getProject(), cmdLineArgs, testFile
 						.getParent().getLocation());
+
+				TestRunSession session = new TestRunSession(launcher, "TestRunTest", testFile);
+				addTestRunSession(session);
+
 				String output = launcher.launch(testFile.getProject());
 				IProblem[] problems = parseOutput(testFile.getProject(), output);
 
-				importTestRunSession(summaryFile);
+				// importTestRunSession(summaryFile);
 
 				return problems;
 			}
@@ -231,6 +238,18 @@ public class PHPUnit extends AbstractPHPTool {
 	private File createTempSummaryFile(String fileName) throws IOException {
 		File tempDir = createTempDir("pti_phpunit"); //$NON-NLS-1$
 		return createTempFile(tempDir, fileName);
+	}
+
+	private void addTestRunSession(final TestRunSession session) {
+		UIJob job = new UIJob("Update Test Runner") {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				PHPUnitPlugin.getModel().addTestRunSession(session);
+				notifyResultListener(session);
+
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
 	}
 
 	private void importTestRunSession(final File summaryFile) {
@@ -274,13 +293,20 @@ public class PHPUnit extends AbstractPHPTool {
 			String cmdLineArgs = OperatingSystem.escapeShellFileArg(file.getLocation().toOSString());
 
 			final File summaryFile = createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
-			cmdLineArgs = "--log-junit " + OperatingSystem.escapeShellFileArg(summaryFile.toString()) + " "
-					+ cmdLineArgs;
+			// cmdLineArgs = "--log-junit " +
+			// OperatingSystem.escapeShellFileArg(summaryFile.toString()) + " "
+			// + cmdLineArgs;
+
+			cmdLineArgs = "--log-json php://stdout " + cmdLineArgs;
 
 			PHPToolLauncher launcher = getProjectPHPToolLauncher(file.getProject(), cmdLineArgs, file.getLocation());
+
+			TestRunSession session = new TestRunSession(launcher, "TestRunTest", file);
+			addTestRunSession(session);
+
 			IProblem[] problems = parseOutput(file.getProject(), launcher.launch(file.getProject()));
 
-			importTestRunSession(summaryFile);
+			// importTestRunSession(summaryFile);
 
 			return problems;
 		} catch (IOException e) {
