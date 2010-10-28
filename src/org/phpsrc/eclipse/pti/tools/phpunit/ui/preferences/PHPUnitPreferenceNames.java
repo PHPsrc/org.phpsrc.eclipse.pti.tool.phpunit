@@ -16,4 +16,5 @@ public class PHPUnitPreferenceNames {
 	public static final String PREF_TEST_FILE_PATTERN_FOLDER = "test_file_pattern_folder"; //$NON-NLS-1$
 	public static final String PREF_TEST_FILE_PATTERN_FILE = "test_file_pattern_file"; //$NON-NLS-1$
 	public static final String PREF_TEST_FILE_SUPER_CLASS = "test_file_super_class"; //$NON-NLS-1$
+	public static final String PREF_GENERATE_CODE_COVERAGE = "generate_code_coverage"; //$NON-NLS-1$
 }

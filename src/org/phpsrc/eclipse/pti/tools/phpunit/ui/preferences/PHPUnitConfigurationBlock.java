@@ -19,6 +19,7 @@ import org.eclipse.php.internal.ui.preferences.util.Key;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -35,7 +36,8 @@ import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 
-public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationBlock {
+public class PHPUnitConfigurationBlock extends
+		AbstractPEARPHPToolConfigurationBlock {
 
 	private static final Key PREF_PHP_EXECUTABLE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE);
 	private static final Key PREF_PEAR_LIBRARY = getPHPUnitKey(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY);
@@ -44,27 +46,35 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 	private static final Key PREF_TEST_FILE_PATTERN_FOLDER = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER);
 	private static final Key PREF_TEST_FILE_PATTERN_FILE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
 	private static final Key PREF_TEST_FILE_SUPER_CLASS = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
+	private static final Key PREF_GENERATE_CODE_COVERAGE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE);
 
 	public static final String TEST_FILE_PATTERN_FOLDER_DEFAULT = File.separatorChar
-			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT + File.separatorChar + "tests"
-			+ File.separatorChar + IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR;
+			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT
+			+ File.separatorChar
+			+ "tests"
+			+ File.separatorChar
+			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR;
 	public static final String TEST_FILE_PATTERN_FILE_DEFAULT = IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME
-			+ "Test." + IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION;
+			+ "Test."
+			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION;
 
 	protected Text fBootstrap;
 	protected Button fFileButton;
 	protected Text fTestFilePatternFolder;
 	protected Text fTestFilePatternFile;
 	protected Text fTestFileSuperClass;
+	protected Button fGenerateCodeCoverageCheckbox;
 
-	public PHPUnitConfigurationBlock(IStatusChangeListener context, IProject project,
-			IWorkbenchPreferenceContainer container) {
+	public PHPUnitConfigurationBlock(IStatusChangeListener context,
+			IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
 	}
 
 	private static Key[] getKeys() {
-		return new Key[] { PREF_PHP_EXECUTABLE, PREF_PEAR_LIBRARY, PREF_DEBUG_PRINT_OUTPUT, PREF_BOOSTRAP,
-				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE, PREF_TEST_FILE_SUPER_CLASS };
+		return new Key[] { PREF_PHP_EXECUTABLE, PREF_PEAR_LIBRARY,
+				PREF_DEBUG_PRINT_OUTPUT, PREF_BOOSTRAP,
+				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE,
+				PREF_TEST_FILE_SUPER_CLASS, PREF_GENERATE_CODE_COVERAGE };
 	}
 
 	protected Composite createToolContents(Composite parent) {
@@ -99,61 +109,83 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		testFilePatternLayout.verticalSpacing = 9;
 		testFilePatternGroup.setLayout(testFilePatternLayout);
 
-		Label testFileSuperClassLabel = new Label(testFilePatternGroup, SWT.NULL);
+		Label testFileSuperClassLabel = new Label(testFilePatternGroup,
+				SWT.NULL);
 		testFileSuperClassLabel.setText("SuperClass:");
 
-		fTestFileSuperClass = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
-		fTestFileSuperClass.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fTestFileSuperClass = new Text(testFilePatternGroup, SWT.BORDER
+				| SWT.SINGLE);
+		fTestFileSuperClass
+				.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Button fTestFileSuperClassButton = new Button(testFilePatternGroup, SWT.PUSH);
+		Button fTestFileSuperClassButton = new Button(testFilePatternGroup,
+				SWT.PUSH);
 		fTestFileSuperClassButton.setText("Search...");
 		fTestFileSuperClassButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
-				FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(getShell(), false);
+				FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(
+						getShell(), false);
 				if (dialog.open() == Window.OK) {
-					PHPSearchMatch result = (PHPSearchMatch) dialog.getFirstResult();
+					PHPSearchMatch result = (PHPSearchMatch) dialog
+							.getFirstResult();
 					if (result != null && result.getElement() != null)
-						fTestFileSuperClass.setText(result.getElement().getElementName());
+						fTestFileSuperClass.setText(result.getElement()
+								.getElementName());
 				}
 			}
 		});
 
-		Label testFilePatternFolderLabel = new Label(testFilePatternGroup, SWT.NULL);
+		Label testFilePatternFolderLabel = new Label(testFilePatternGroup,
+				SWT.NULL);
 		testFilePatternFolderLabel.setText("Source Folder Pattern:");
 
-		fTestFilePatternFolder = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
-		fTestFilePatternFolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fTestFilePatternFolder = new Text(testFilePatternGroup, SWT.BORDER
+				| SWT.SINGLE);
+		fTestFilePatternFolder.setLayoutData(new GridData(
+				GridData.FILL_HORIZONTAL));
 
-		Button fTestFilePatternFolderDefaultButton = new Button(testFilePatternGroup, SWT.PUSH);
+		Button fTestFilePatternFolderDefaultButton = new Button(
+				testFilePatternGroup, SWT.PUSH);
 		fTestFilePatternFolderDefaultButton.setText("Default");
-		fTestFilePatternFolderDefaultButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(final SelectionEvent e) {
-				fTestFilePatternFolder.setText(TEST_FILE_PATTERN_FOLDER_DEFAULT);
-			}
-		});
+		fTestFilePatternFolderDefaultButton
+				.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(final SelectionEvent e) {
+						fTestFilePatternFolder
+								.setText(TEST_FILE_PATTERN_FOLDER_DEFAULT);
+					}
+				});
 
-		Label testFilePatternFolderInfoLabel = new Label(testFilePatternGroup, SWT.NONE);
-		testFilePatternFolderInfoLabel.setText("Use placeholder %p for project and %d for directory.");
+		Label testFilePatternFolderInfoLabel = new Label(testFilePatternGroup,
+				SWT.NONE);
+		testFilePatternFolderInfoLabel
+				.setText("Use placeholder %p for project and %d for directory.");
 		GridData folderInfoData = new GridData(GridData.FILL_HORIZONTAL);
 		folderInfoData.horizontalSpan = 3;
 		testFilePatternFolderInfoLabel.setLayoutData(folderInfoData);
 		makeFontItalic(testFilePatternFolderInfoLabel);
 
-		Label testFilePatternFileLabel = new Label(testFilePatternGroup, SWT.NULL);
+		Label testFilePatternFileLabel = new Label(testFilePatternGroup,
+				SWT.NULL);
 		testFilePatternFileLabel.setText("File Name Pattern:");
 
-		fTestFilePatternFile = new Text(testFilePatternGroup, SWT.BORDER | SWT.SINGLE);
-		fTestFilePatternFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fTestFilePatternFile = new Text(testFilePatternGroup, SWT.BORDER
+				| SWT.SINGLE);
+		fTestFilePatternFile.setLayoutData(new GridData(
+				GridData.FILL_HORIZONTAL));
 
-		Button fTestFilePatternFileDefaultButton = new Button(testFilePatternGroup, SWT.PUSH);
+		Button fTestFilePatternFileDefaultButton = new Button(
+				testFilePatternGroup, SWT.PUSH);
 		fTestFilePatternFileDefaultButton.setText("Default");
-		fTestFilePatternFileDefaultButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(final SelectionEvent e) {
-				fTestFilePatternFile.setText(TEST_FILE_PATTERN_FILE_DEFAULT);
-			}
-		});
+		fTestFilePatternFileDefaultButton
+				.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(final SelectionEvent e) {
+						fTestFilePatternFile
+								.setText(TEST_FILE_PATTERN_FILE_DEFAULT);
+					}
+				});
 
-		Label testFilePatternFileInfoLabel = new Label(testFilePatternGroup, SWT.NONE);
+		Label testFilePatternFileInfoLabel = new Label(testFilePatternGroup,
+				SWT.NONE);
 		testFilePatternFileInfoLabel
 				.setText("Use placeholder %f for filename without extension and %e for file extension.");
 		GridData fileInfoData = new GridData(GridData.FILL_HORIZONTAL);
@@ -187,23 +219,47 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 			}
 		});
 
+		fGenerateCodeCoverageCheckbox = new Button(phpUnitOptionsGroup,
+				SWT.CHECK);
+		fGenerateCodeCoverageCheckbox.setText("Generate code coverage");
+		fGenerateCodeCoverageCheckbox
+				.setSelection(getBooleanValue(PREF_GENERATE_CODE_COVERAGE));
+		fGenerateCodeCoverageCheckbox
+				.addSelectionListener(new SelectionListener() {
+					public void widgetSelected(SelectionEvent e) {
+						boolean selection = fGenerateCodeCoverageCheckbox
+								.getSelection();
+						setValue(PREF_GENERATE_CODE_COVERAGE, selection);
+					}
+
+					public void widgetDefaultSelected(SelectionEvent e) {
+					}
+				});
+
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalSpan = 3;
+		fGenerateCodeCoverageCheckbox.setLayoutData(data);
+
 		return phpUnitOptionsGroup;
 	}
 
 	private void handleBrowse() {
 
-		final ResourceSelectionDialog dialog = new ResourceSelectionDialog(getShell(), ResourcesPlugin.getWorkspace()
-				.getRoot(), "Select Bootstrap File");
+		final ResourceSelectionDialog dialog = new ResourceSelectionDialog(
+				getShell(), ResourcesPlugin.getWorkspace().getRoot(),
+				"Select Bootstrap File");
 
 		if (dialog.open() == Window.OK) {
 			final Object[] result = dialog.getResult();
 			if (result.length > 0) {
-				fBootstrap.setText(((IFile) result[0]).getFullPath().toOSString());
+				fBootstrap.setText(((IFile) result[0]).getFullPath()
+						.toOSString());
 			}
 		}
 	}
 
-	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+	protected void validateSettings(Key changedKey, String oldValue,
+			String newValue) {
 		// TODO Auto-generated method stub
 	}
 
@@ -211,7 +267,8 @@ public class PHPUnitConfigurationBlock extends AbstractPEARPHPToolConfigurationB
 		clearProjectLauncherCache(PHPUnit.QUALIFIED_NAME);
 
 		setValue(PREF_BOOSTRAP, fBootstrap.getText());
-		setValue(PREF_TEST_FILE_PATTERN_FOLDER, fTestFilePatternFolder.getText());
+		setValue(PREF_TEST_FILE_PATTERN_FOLDER,
+				fTestFilePatternFolder.getText());
 		setValue(PREF_TEST_FILE_PATTERN_FILE, fTestFilePatternFile.getText());
 		setValue(PREF_TEST_FILE_SUPER_CLASS, fTestFileSuperClass.getText());
 
