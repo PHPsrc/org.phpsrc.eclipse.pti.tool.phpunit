@@ -9,8 +9,10 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.phpsrc.eclipse.pti.core.php.source.PHPSourceFile;
+import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.ui.Logger;
 import org.xml.sax.Attributes;
@@ -32,30 +34,30 @@ public class CloverCodeCoverageHandler extends DefaultHandler {
 		if (NODE_FILE.equals(qName)) {
 			IFile file = PHPUnitPlugin.resolveProjectFile(attributes
 					.getValue(ATTR_NAME));
-			System.out.println(file);
-			try {
-				coverageFile = file != null ? new PHPSourceFile(file) : null;
-			} catch (CoreException e) {
-				Logger.logException(e);
-				coverageFile = null;
-			} catch (IOException e) {
-				Logger.logException(e);
+			if (file != null) {
+				try {
+					coverageFile = new PHPSourceFile(file);
+					file.deleteMarkers(
+							IPHPUnitConstants.VALIDATOR_PHPUNIT_CODE_COVERAGE_MARKER,
+							false, IResource.DEPTH_INFINITE);
+				} catch (CoreException e) {
+					Logger.logException(e);
+				} catch (IOException e) {
+					Logger.logException(e);
+				}
+			} else {
 				coverageFile = null;
 			}
-			System.out.println(coverageFile);
 		} else if (NODE_LINE.equals(qName) && coverageFile != null) {
 			try {
 				int count = Integer.parseInt(attributes.getValue(ATTR_COUNT));
-				System.out.println("Count: " + count);
 				if (count == 0) {
 					int line = Integer.parseInt(attributes.getValue(ATTR_NUM));
-					System.out.println("Line: " + line);
 					if (line > 0) {
-						System.out.println("new marker");
 						IMarker marker = coverageFile
 								.getFile()
 								.createMarker(
-										"org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker");
+										IPHPUnitConstants.VALIDATOR_PHPUNIT_CODE_COVERAGE_MARKER);
 
 						marker.setAttribute(IMarker.MESSAGE,
 								"No code coverage for line " + line);
