@@ -53,6 +53,7 @@ import org.phpsrc.eclipse.pti.core.php.source.PHPSourceFile;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.tools.AbstractPHPTool;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.codecoverage.CloverCodeCoverageHandler;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.PHPUnitModel;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestRunSession;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
@@ -262,8 +263,8 @@ public class PHPUnit extends AbstractPHPTool {
 				importTestRunSession(summaryFile);
 
 				if (coverageFile != null && coverageFile.exists()) {
-
-					coverageFile.delete();
+					CloverCodeCoverageHandler.importXml(coverageFile);
+					// coverageFile.delete();
 				}
 
 				return problems;

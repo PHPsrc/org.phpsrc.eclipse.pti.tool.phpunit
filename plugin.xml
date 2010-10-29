@@ -170,5 +170,50 @@
 			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
 			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
 		</perspectiveExtension>
+	</extension>     
+
+	<extension
+		id="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+		name="PHPUnit Code Coverage"
+		point="org.eclipse.core.resources.markers">
+		<persistent value="false"/>
+		<attribute name="lineNumber"/>
+		<attribute name="charStart"/>
+		<attribute name="charEnd"/>
+		<attribute name="message"/>
+		<attribute name="priority"/>
+		<attribute name="severity"/>
+		<super type="org.eclipse.core.resources.problemmarker"/>
+ 	</extension>
+
+	<extension point="org.eclipse.ui.editors.annotationTypes">
+		<type
+			name="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			super="org.eclipse.ui.workbench.texteditor.info"
+			markerType="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+			markerSeverity="0">
+		</type>
 	</extension>
+
+	
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+		<specification
+			annotationType="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			textPreferenceKey="highlight.text"
+			colorPreferenceKey="highlight.color"
+			highlightPreferenceKey="highlight.background"
+			textPreferenceValue="false"
+			textStylePreferenceValue="IBEAM"
+			overviewRulerPreferenceKey="highlight.rulers.overview"
+			presentationLayer="4"
+			label="PHPUnit Code Coverage"
+			colorPreferenceValue="255,0,0"
+			verticalRulerPreferenceValue="true"
+			overviewRulerPreferenceValue="true"
+			highlightPreferenceValue="true"
+			textStylePreferenceKey="highlight.text.style" >
+		</specification>
+	</extension>
+
+	
 </plugin>
