@@ -116,13 +116,18 @@
 		</category>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Run PHPUnit Test">
 		</command>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Toggle Test Case / Test Element">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.synctestcase"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Sychronise Test Case / Test Element">
 		</command>
 	</extension>
 
@@ -151,6 +156,16 @@
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Toggle Test Case / Test Element"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
+				enablesFor="*">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.synctestcase"
+				label="Sychronise Test Case / Test Element"
+				icon="icons/full/obj16/synctestcase.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Sychronise Test Case / Test Element"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
 				enablesFor="*">
 			</action>
 		</actionSet>
