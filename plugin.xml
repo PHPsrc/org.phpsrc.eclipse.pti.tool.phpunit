@@ -189,12 +189,10 @@
 	<extension point="org.eclipse.ui.editors.annotationTypes">
 		<type
 			name="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
-			super="org.eclipse.ui.workbench.texteditor.info"
 			markerType="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
 			markerSeverity="0">
 		</type>
 	</extension>
-
 	
 	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
 		<specification
@@ -202,18 +200,19 @@
 			textPreferenceKey="highlight.text"
 			colorPreferenceKey="highlight.color"
 			highlightPreferenceKey="highlight.background"
-			textPreferenceValue="false"
+			textPreferenceValue="true"
 			textStylePreferenceValue="IBEAM"
 			overviewRulerPreferenceKey="highlight.rulers.overview"
 			presentationLayer="4"
 			label="PHPUnit Code Coverage"
-			colorPreferenceValue="255,0,0"
+			colorPreferenceValue="223,228,238"
 			verticalRulerPreferenceValue="true"
 			overviewRulerPreferenceValue="true"
 			highlightPreferenceValue="true"
-			textStylePreferenceKey="highlight.text.style" >
+			textStylePreferenceKey="highlight.text.style"
+			includeOnPreferencePage="true"
+			icon=""
+			quickFixIcon="">
 		</specification>
 	</extension>
-
-	
 </plugin>

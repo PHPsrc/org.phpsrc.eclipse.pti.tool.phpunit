@@ -264,7 +264,7 @@ public class PHPUnit extends AbstractPHPTool {
 
 				if (coverageFile != null && coverageFile.exists()) {
 					CloverCodeCoverageHandler.importXml(coverageFile);
-					// coverageFile.delete();
+					coverageFile.delete();
 				}
 
 				return problems;
@@ -286,12 +286,14 @@ public class PHPUnit extends AbstractPHPTool {
 	private void importTestRunSession(final File summaryFile) {
 		UIJob job = new UIJob("Update Test Runner") {
 			public IStatus runInUIThread(IProgressMonitor monitor) {
-				try {
-					TestRunSession session = PHPUnitModel
-							.importTestRunSession(summaryFile);
-					notifyResultListener(session);
-				} catch (CoreException e) {
-					Logger.logException(e);
+				if (summaryFile.exists() && summaryFile.length() > 0) {
+					try {
+						TestRunSession session = PHPUnitModel
+								.importTestRunSession(summaryFile);
+						notifyResultListener(session);
+					} catch (CoreException e) {
+						Logger.logException(e);
+					}
 				}
 				return Status.OK_STATUS;
 			}
@@ -502,13 +504,13 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	static public IFile searchTestCase(IFile file) {
+		if (isTestCase(file))
+			return file;
+
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
 		try {
 			IType[] types = module.getAllTypes();
 			if (types.length > 0) {
-				if (PHPToolkitUtil.hasSuperClass(module,
-						PHPUNIT_TEST_CASE_CLASS))
-					return file;
 
 				SearchMatch[] matches = PHPSearchEngine.findClass(
 						types[0].getElementName() + "Test",
@@ -525,13 +527,13 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	static public IFile searchTestElement(IFile testCase) {
+		if (!isTestCase(testCase))
+			return testCase;
+
 		ISourceModule module = PHPToolkitUtil.getSourceModule(testCase);
 		try {
 			IType[] types = module.getAllTypes();
 			if (types.length > 0) {
-				if (!PHPToolkitUtil.hasSuperClass(module,
-						PHPUNIT_TEST_CASE_CLASS))
-					return testCase;
 				String name = types[0].getElementName();
 				name = name.substring(0, name.length() - 4);
 				SearchMatch[] matches = PHPSearchEngine.findClass(name,
@@ -549,7 +551,12 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	static public boolean isTestCase(IFile file) {
-		return PHPToolkitUtil.hasSuperClass(file, PHPUNIT_TEST_CASE_CLASS);
+		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
+		String testCaseClass = prefs.getTestFileSuperClass();
+		if (testCaseClass == null || "".equals(testCaseClass))
+			testCaseClass = PHPUNIT_TEST_CASE_CLASS;
+
+		return PHPToolkitUtil.hasSuperClass(file, testCaseClass);
 	}
 
 	static public boolean isTestSuite(IFile file) {
