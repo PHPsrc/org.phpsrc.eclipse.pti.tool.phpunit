@@ -60,7 +60,7 @@ public class CloverCodeCoverageHandler extends DefaultHandler {
 										IPHPUnitConstants.VALIDATOR_PHPUNIT_CODE_COVERAGE_MARKER);
 
 						marker.setAttribute(IMarker.MESSAGE,
-								"No code coverage for line " + line);
+								"No code coverage for last test run");
 
 						marker.setAttribute(IMarker.PROBLEM, false);
 						marker.setAttribute(IMarker.LINE_NUMBER, line);
