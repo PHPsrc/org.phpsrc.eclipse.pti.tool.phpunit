@@ -303,8 +303,21 @@ public class PHPUnit extends AbstractPHPTool {
 
 	public IProblem[] runAllTestsInFolder(IFolder folder) {
 		try {
+			PHPUnitPreferences prefs = PHPUnitPreferencesFactory
+					.factory(folder);
+
 			String cmdLineArgs = OperatingSystem.escapeShellFileArg(folder
 					.getLocation().toOSString());
+
+			File coverageFile = null;
+			if (prefs.generateCodeCoverage()) {
+				coverageFile = new File(
+						PHPUnitPlugin.getCodeCoverageDirectory(),
+						folder.getName() + ".xml");
+				cmdLineArgs = " --coverage-clover "
+						+ OperatingSystem.escapeShellFileArg(coverageFile
+								.toString()) + " " + cmdLineArgs;
+			}
 
 			final File summaryFile = createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
 			cmdLineArgs = "--log-junit "
@@ -319,6 +332,11 @@ public class PHPUnit extends AbstractPHPTool {
 
 			importTestRunSession(summaryFile);
 
+			if (coverageFile != null && coverageFile.exists()) {
+				CloverCodeCoverageHandler.importXml(coverageFile);
+				coverageFile.delete();
+			}
+
 			return problems;
 		} catch (IOException e) {
 			Logger.logException(e);
@@ -329,6 +347,8 @@ public class PHPUnit extends AbstractPHPTool {
 
 	public IProblem[] runTestSuite(IFile file) {
 		try {
+			PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
+
 			String cmdLineArgs = OperatingSystem.escapeShellFileArg(file
 					.getLocation().toOSString());
 
@@ -338,12 +358,27 @@ public class PHPUnit extends AbstractPHPTool {
 							.escapeShellFileArg(summaryFile.toString()) + " "
 					+ cmdLineArgs;
 
+			File coverageFile = null;
+			if (prefs.generateCodeCoverage()) {
+				coverageFile = new File(
+						PHPUnitPlugin.getCodeCoverageDirectory(),
+						file.getName() + ".xml");
+				cmdLineArgs = " --coverage-clover "
+						+ OperatingSystem.escapeShellFileArg(coverageFile
+								.toString()) + " " + cmdLineArgs;
+			}
+
 			PHPToolLauncher launcher = getProjectPHPToolLauncher(
 					file.getProject(), cmdLineArgs, file.getLocation());
 			IProblem[] problems = parseOutput(file.getProject(),
 					launcher.launch(file.getProject()));
 
 			importTestRunSession(summaryFile);
+
+			if (coverageFile != null && coverageFile.exists()) {
+				CloverCodeCoverageHandler.importXml(coverageFile);
+				coverageFile.delete();
+			}
 
 			return problems;
 		} catch (IOException e) {
