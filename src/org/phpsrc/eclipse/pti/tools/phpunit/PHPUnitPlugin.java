@@ -60,10 +60,12 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	public static final String IMG_PHPUNIT_TEST_SUITE_FAIL = "IMG_PHPUNIT_TEST_SUITE_FAIL"; //$NON-NLS-1$
 	public static final String IMG_PHPUNIT_TEST_SUITE_OK = "IMG_PHPUNIT_TEST_SUITE_OK"; //$NON-NLS-1$
 
-	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS = PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS = PLUGIN_ID
+			+ "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final IPath ICONS_PATH = new Path("$nl$/icons/full"); //$NON-NLS-1$
 	private static final String HISTORY_DIR_NAME = "history"; //$NON-NLS-1$
+	private static final String CODE_COVERAGE_DIR_NAME = "codecoverage"; //$NON-NLS-1$
 
 	// The shared instance
 	private static PHPUnitPlugin plugin;
@@ -104,26 +106,46 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	}
 
 	protected void initializeImageRegistry(ImageRegistry registry) {
-		registry.put(IMG_PHPUNIT, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/phpunit.gif")));
-		registry.put(IMG_PHPUNIT_TEST, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/test.gif")));
-		registry.put(IMG_PHPUNIT_TEST_ERROR, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/testerr.gif")));
-		registry.put(IMG_PHPUNIT_TEST_FAIL, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/testfail.gif")));
-		registry.put(IMG_PHPUNIT_TEST_IGNORED, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/testignored.gif")));
-		registry.put(IMG_PHPUNIT_TEST_OK, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/testok.gif")));
-		registry.put(IMG_PHPUNIT_TEST_SUITE, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuite.gif")));
-		registry.put(IMG_PHPUNIT_TEST_SUITE_ERROR, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuiteerror.gif")));
-		registry.put(IMG_PHPUNIT_TEST_SUITE_FAIL, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuitefail.gif")));
-		registry.put(IMG_PHPUNIT_TEST_SUITE_OK, ImageDescriptor
-				.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuiteok.gif")));
+		registry.put(
+				IMG_PHPUNIT,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/phpunit.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/test.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_ERROR,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/testerr.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_FAIL,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/testfail.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_IGNORED,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/testignored.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_OK,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/testok.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_SUITE,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuite.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_SUITE_ERROR,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuiteerror.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_SUITE_FAIL,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuitefail.gif")));
+		registry.put(
+				IMG_PHPUNIT_TEST_SUITE_OK,
+				ImageDescriptor
+						.createFromURL(resolvePluginResourceURL("icons/full/obj16/tsuiteok.gif")));
 	}
 
 	/*
@@ -168,7 +190,8 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 
 		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(project);
 
-		IPath[] pearPaths = PHPLibraryPEARPlugin.getDefault().getPluginIncludePaths(prefs.getPearLibraryName());
+		IPath[] pearPaths = PHPLibraryPEARPlugin.getDefault()
+				.getPluginIncludePaths(prefs.getPearLibraryName());
 
 		IPath[] includePaths = new IPath[pearPaths.length + 1];
 		includePaths[0] = resolvePluginResource("/php/tools");
@@ -199,12 +222,14 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 		setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
 	}
 
-	private static void setImageDescriptors(IAction action, String type, String relPath) {
+	private static void setImageDescriptors(IAction action, String type,
+			String relPath) {
 		ImageDescriptor id = createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
 		if (id != null)
 			action.setDisabledImageDescriptor(id);
 
-		ImageDescriptor descriptor = createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
+		ImageDescriptor descriptor = createImageDescriptor(
+				"e" + type, relPath, true); //$NON-NLS-1$
 		action.setHoverImageDescriptor(descriptor);
 		action.setImageDescriptor(descriptor);
 	}
@@ -216,10 +241,11 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	 * 'missing image descriptor' is returned or <code>null</code>. or
 	 * <code>null</code>.
 	 */
-	private static ImageDescriptor createImageDescriptor(String pathPrefix, String imageName,
-			boolean useMissingImageDescriptor) {
+	private static ImageDescriptor createImageDescriptor(String pathPrefix,
+			String imageName, boolean useMissingImageDescriptor) {
 		IPath path = ICONS_PATH.append(pathPrefix).append(imageName);
-		return createImageDescriptor(PHPUnitPlugin.getDefault().getBundle(), path, useMissingImageDescriptor);
+		return createImageDescriptor(PHPUnitPlugin.getDefault().getBundle(),
+				path, useMissingImageDescriptor);
 	}
 
 	/**
@@ -240,7 +266,8 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	 *         image at the given location and
 	 *         <code>useMissingImageDescriptor</code> is <code>true</code>
 	 */
-	private static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
+	private static ImageDescriptor createImageDescriptor(Bundle bundle,
+			IPath path, boolean useMissingImageDescriptor) {
 		URL url = FileLocator.find(bundle, path, null);
 		if (url != null) {
 			return ImageDescriptor.createFromURL(url);
@@ -265,12 +292,23 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	}
 
 	public static File getHistoryDirectory() throws IllegalStateException {
-		File historyDir = getDefault().getStateLocation().append(HISTORY_DIR_NAME).toFile();
+		File historyDir = getDefault().getStateLocation()
+				.append(HISTORY_DIR_NAME).toFile();
 		if (!historyDir.isDirectory()) {
 			historyDir.mkdir();
 		}
 
 		return historyDir;
+	}
+
+	public static File getCodeCoverageDirectory() throws IllegalStateException {
+		File coverageDir = getDefault().getStateLocation()
+				.append(CODE_COVERAGE_DIR_NAME).toFile();
+		if (!coverageDir.isDirectory()) {
+			coverageDir.mkdir();
+		}
+
+		return coverageDir;
 	}
 
 	/**
@@ -318,18 +356,20 @@ public class PHPUnitPlugin extends AbstractPHPToolPlugin {
 	 */
 	private void loadTestRunListeners() {
 		fLegacyTestRunListeners = new ArrayList();
-		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(
-				ID_EXTENSION_POINT_TESTRUN_LISTENERS);
+		IExtensionPoint extensionPoint = Platform.getExtensionRegistry()
+				.getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
 		}
-		IConfigurationElement[] configs = extensionPoint.getConfigurationElements();
+		IConfigurationElement[] configs = extensionPoint
+				.getConfigurationElements();
 		MultiStatus status = new MultiStatus(PLUGIN_ID, IStatus.OK,
 				"Could not load some testRunner extension points", null); //$NON-NLS-1$
 
 		for (int i = 0; i < configs.length; i++) {
 			try {
-				Object testRunListener = configs[i].createExecutableExtension("class"); //$NON-NLS-1$
+				Object testRunListener = configs[i]
+						.createExecutableExtension("class"); //$NON-NLS-1$
 				if (testRunListener instanceof ITestRunListener) {
 					fLegacyTestRunListeners.add(testRunListener);
 				}

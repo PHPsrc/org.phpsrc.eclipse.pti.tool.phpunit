@@ -116,18 +116,13 @@
 		</category>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
 			name="Run PHPUnit Test">
 		</command>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
-			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
 			name="Toggle Test Case / Test Element">
-		</command>
-		<command
-			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.synctestcase"
-			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
-			name="Sychronise Test Case / Test Element">
 		</command>
 	</extension>
 
@@ -158,16 +153,6 @@
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
 				enablesFor="*">
 			</action>
-			<action
-				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
-				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.synctestcase"
-				label="Sychronise Test Case / Test Element"
-				icon="icons/full/obj16/synctestcase.gif"
-				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
-				tooltip="Sychronise Test Case / Test Element"
-				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
-				enablesFor="*">
-			</action>
 		</actionSet>
 	</extension>
 	<extension point="org.eclipse.ui.views">
@@ -185,5 +170,49 @@
 			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
 			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
 		</perspectiveExtension>
+	</extension>     
+
+	<extension
+		id="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+		name="PHPUnit Code Coverage"
+		point="org.eclipse.core.resources.markers">
+		<persistent value="false"/>
+		<attribute name="lineNumber"/>
+		<attribute name="charStart"/>
+		<attribute name="charEnd"/>
+		<attribute name="message"/>
+		<attribute name="priority"/>
+		<attribute name="severity"/>
+		<super type="org.eclipse.core.resources.problemmarker"/>
+ 	</extension>
+
+	<extension point="org.eclipse.ui.editors.annotationTypes">
+		<type
+			name="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			markerType="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+			markerSeverity="0">
+		</type>
+	</extension>
+	
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+		<specification
+			annotationType="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			textPreferenceKey="highlight.text"
+			colorPreferenceKey="highlight.color"
+			highlightPreferenceKey="highlight.background"
+			textPreferenceValue="true"
+			textStylePreferenceValue="IBEAM"
+			overviewRulerPreferenceKey="highlight.rulers.overview"
+			presentationLayer="4"
+			label="PHPUnit Code Coverage"
+			colorPreferenceValue="223,228,238"
+			verticalRulerPreferenceValue="true"
+			overviewRulerPreferenceValue="true"
+			highlightPreferenceValue="true"
+			textStylePreferenceKey="highlight.text.style"
+			includeOnPreferencePage="true"
+			icon=""
+			quickFixIcon="">
+		</specification>
 	</extension>
 </plugin>

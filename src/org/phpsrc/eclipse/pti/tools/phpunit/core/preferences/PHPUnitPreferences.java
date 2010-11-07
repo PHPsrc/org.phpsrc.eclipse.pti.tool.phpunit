@@ -16,16 +16,21 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 	protected String testFilePatternFolder;
 	protected String testFilePatternFile;
 	protected String testFileSuperClass;
+	protected boolean generateCodeCoverage;
 
-	public PHPUnitPreferences(String phpExecutable, boolean printOutput, String pearLibraryName, String bootstrap,
-			String testFilePatternFolder, String testFilePatternFile, String testFileSuperClass) {
+	public PHPUnitPreferences(String phpExecutable, boolean printOutput,
+			String pearLibraryName, String bootstrap,
+			String testFilePatternFolder, String testFilePatternFile,
+			String testFileSuperClass, boolean generateCodeCoverage) {
 		super(phpExecutable, printOutput, pearLibraryName);
 		this.bootstrap = bootstrap;
 		this.testFilePatternFolder = testFilePatternFolder;
 		this.testFilePatternFile = testFilePatternFile;
 		this.testFileSuperClass = testFileSuperClass;
-		if (this.testFileSuperClass == null || "".equals(this.testFileSuperClass))
+		if (this.testFileSuperClass == null
+				|| "".equals(this.testFileSuperClass))
 			this.testFileSuperClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
+		this.generateCodeCoverage = generateCodeCoverage;
 	}
 
 	public String getBootstrap() {
@@ -42,5 +47,9 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 
 	public String getTestFileSuperClass() {
 		return testFileSuperClass;
+	}
+
+	public boolean generateCodeCoverage() {
+		return generateCodeCoverage;
 	}
 }
