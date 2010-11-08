@@ -306,23 +306,55 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR)
 				+ "(\\{([0-9]*)(,)?([0-9]*)\\})?");
 
+		String[] folderParts = patternPath.split(Pattern.quote(""
+				+ File.separatorChar));
+
 		Matcher mDirPlaceholder = pDirPlaceholder.matcher(patternFolder);
 		while (mDirPlaceholder.find()) {
-			System.out.println("----");
-			System.out.println(mDirPlaceholder.group());
-			System.out.println(mDirPlaceholder.groupCount());
-			System.out.println(mDirPlaceholder.group(1));
-			System.out.println(mDirPlaceholder.group(2));
-			System.out.println(mDirPlaceholder.group(3));
-			System.out.println(mDirPlaceholder.group(4));
+			if (mDirPlaceholder.group(1) != null
+					&& !"".equals(mDirPlaceholder.group(1))) {
+				int start = 1;
+				int end = 0;
+				try {
+					start = Integer.parseInt(mDirPlaceholder.group(2));
+				} catch (Exception e) {
+				}
+				try {
+					end = Integer.parseInt(mDirPlaceholder.group(4));
+				} catch (Exception e) {
+				}
+
+				if (end == 0) {
+					if (",".equals(mDirPlaceholder.group(3))) {
+						end = folderParts.length;
+					} else {
+						end = start;
+					}
+				} else if (end > folderParts.length) {
+					end = folderParts.length;
+				}
+
+				String folderSubstring = "";
+				for (int i = start; i <= end; ++i) {
+					if (folderSubstring.length() > 0) {
+						folderSubstring += File.separatorChar;
+					}
+					folderSubstring += folderParts[i - 1];
+				}
+
+				patternFolder = patternFolder.replace(mDirPlaceholder.group(),
+						folderSubstring);
+			} else {
+				patternFolder = patternFolder
+						.replaceFirst(
+								Pattern.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR),
+								patternPath);
+			}
 		}
 
 		patternFolder = patternFolder.replace(
 				IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
 				patternProject);
-		patternFolder = patternFolder.replace(
-				IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR,
-				patternPath);
 		fContainer.setText(patternFolder);
 
 		if (patternFile == null)

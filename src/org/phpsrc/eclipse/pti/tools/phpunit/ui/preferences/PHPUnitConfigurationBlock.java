@@ -158,7 +158,13 @@ public class PHPUnitConfigurationBlock extends
 		Label testFilePatternFolderInfoLabel = new Label(testFilePatternGroup,
 				SWT.NONE);
 		testFilePatternFolderInfoLabel
-				.setText("Use placeholder %p for project and %d for directory.");
+				.setText("Use placeholder %p for project and %d[{start,end}] for directory."
+						+ "\nExamples for file /library/myframework/subfolder1/subfolder2/filename.php"
+						+ "\n%d = /library/myframework/subfolder1/subfolder2"
+						+ "\n%d{3} = subfolder1"
+						+ "\n%d{2,3} = myframework/subfolder1"
+						+ "\n%d{,3} = library/myframework/subfolder1"
+						+ "\n%d{2,} = myframework/subfolder1/subfolder2");
 		GridData folderInfoData = new GridData(GridData.FILL_HORIZONTAL);
 		folderInfoData.horizontalSpan = 3;
 		testFilePatternFolderInfoLabel.setLayoutData(folderInfoData);
