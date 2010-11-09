@@ -1,7 +1,11 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.actions;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.IType;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -12,10 +16,14 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
+import org.phpsrc.eclipse.pti.core.PHPToolkitUtil;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
+import org.phpsrc.eclipse.pti.ui.Logger;
 
-public class ToogleTestCaseTestElementAction implements IWorkbenchWindowActionDelegate {
+public class ToogleTestCaseTestElementAction implements
+		IWorkbenchWindowActionDelegate {
 	public void run(IAction action) {
 		IWorkbenchPage page = PHPUnitPlugin.getActivePage();
 		if (page != null) {
@@ -28,10 +36,36 @@ public class ToogleTestCaseTestElementAction implements IWorkbenchWindowActionDe
 						if (PHPUnit.isTestSuite(file))
 							return;
 
+						IFile targetFile = null;
+						String errorMsg = null;
 						if (PHPUnit.isTestCase(file)) {
-							openFile(page, PHPUnit.searchTestElement(file));
+							targetFile = PHPUnit.searchTestElement(file);
+							errorMsg = "Can't find php class for test case class ";
 						} else {
-							openFile(page, PHPUnit.searchTestCase(file));
+							targetFile = PHPUnit.searchTestCase(file);
+							errorMsg = "Can't find test case class for php class ";
+						}
+
+						if (!openFile(page, targetFile)) {
+							String sourceClassName = "unknown";
+							try {
+								ISourceModule module = PHPToolkitUtil
+										.getSourceModule(file);
+								if (module != null) {
+									IType[] types = module.getAllTypes();
+									if (types.length > 0) {
+										sourceClassName = types[0]
+												.getElementName();
+									}
+								}
+							} catch (ModelException e) {
+								Logger.logException(e);
+							}
+							MessageDialog
+									.openError(PHPToolCorePlugin
+											.getActiveWorkbenchShell(),
+											"Error", errorMsg + "'"
+													+ sourceClassName + "'");
 						}
 					}
 				}
@@ -39,15 +73,18 @@ public class ToogleTestCaseTestElementAction implements IWorkbenchWindowActionDe
 		}
 	}
 
-	protected void openFile(IWorkbenchPage page, IFile file) {
+	protected boolean openFile(IWorkbenchPage page, IFile file) {
 		if (page != null && file != null) {
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(file.getName());
+			IEditorDescriptor desc = PlatformUI.getWorkbench()
+					.getEditorRegistry().getDefaultEditor(file.getName());
 
 			try {
 				page.openEditor(new FileEditorInput(file), desc.getId());
+				return true;
 			} catch (PartInitException e) {
 			}
 		}
+		return false;
 	}
 
 	public void dispose() {
