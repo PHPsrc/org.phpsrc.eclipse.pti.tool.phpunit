@@ -299,9 +299,6 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 			patternProject = path;
 		}
 
-		System.out.println(patternProject);
-		System.out.println(patternPath);
-
 		Pattern pDirPlaceholder = Pattern.compile(Pattern
 				.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR)
 				+ "(\\{([0-9]*)(,)?([0-9]*)\\})?");

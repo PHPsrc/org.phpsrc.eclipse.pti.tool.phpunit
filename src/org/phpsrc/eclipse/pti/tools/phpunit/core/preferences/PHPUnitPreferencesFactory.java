@@ -53,6 +53,9 @@ public class PHPUnitPreferencesFactory {
 		boolean generateCodeCoverage = prefs
 				.getBoolean(PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE);
 
+		boolean noNamespaceCheck = prefs
+				.getBoolean(PHPUnitPreferenceNames.PREF_NO_NAMESPACE_CHECK);
+
 		if (project != null) {
 			IScopeContext[] preferenceScopes = createPreferenceScopes(project);
 			if (preferenceScopes[0] instanceof ProjectScope) {
@@ -81,13 +84,16 @@ public class PHPUnitPreferencesFactory {
 					generateCodeCoverage = node.getBoolean(
 							PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE,
 							generateCodeCoverage);
+					noNamespaceCheck = node.getBoolean(
+							PHPUnitPreferenceNames.PREF_NO_NAMESPACE_CHECK,
+							noNamespaceCheck);
 				}
 			}
 		}
 
 		return new PHPUnitPreferences(phpExe, printOutput, pearLibraryName,
 				bootstrap, testFilePatternFolder, testFilePatternFile,
-				testFileSuperClass, generateCodeCoverage);
+				testFileSuperClass, generateCodeCoverage, noNamespaceCheck);
 	}
 
 	protected static IScopeContext[] createPreferenceScopes(IProject project) {

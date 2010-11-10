@@ -1,9 +1,6 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.actions;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -17,10 +14,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
-import org.phpsrc.eclipse.pti.core.PHPToolkitUtil;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
-import org.phpsrc.eclipse.pti.ui.Logger;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitToolkitUtil;
 
 public class ToogleTestCaseTestElementAction implements
 		IWorkbenchWindowActionDelegate {
@@ -47,20 +43,11 @@ public class ToogleTestCaseTestElementAction implements
 						}
 
 						if (!openFile(page, targetFile)) {
-							String sourceClassName = "unknown";
-							try {
-								ISourceModule module = PHPToolkitUtil
-										.getSourceModule(file);
-								if (module != null) {
-									IType[] types = module.getAllTypes();
-									if (types.length > 0) {
-										sourceClassName = types[0]
-												.getElementName();
-									}
-								}
-							} catch (ModelException e) {
-								Logger.logException(e);
-							}
+							String sourceClassName = PHPUnitToolkitUtil
+									.getClassNameWithNamespace(file);
+							if (sourceClassName == null)
+								sourceClassName = "unknown";
+
 							MessageDialog
 									.openError(PHPToolCorePlugin
 											.getActiveWorkbenchShell(),

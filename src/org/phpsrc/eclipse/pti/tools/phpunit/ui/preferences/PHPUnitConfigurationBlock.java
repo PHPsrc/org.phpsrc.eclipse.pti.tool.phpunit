@@ -47,6 +47,7 @@ public class PHPUnitConfigurationBlock extends
 	private static final Key PREF_TEST_FILE_PATTERN_FILE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
 	private static final Key PREF_TEST_FILE_SUPER_CLASS = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
 	private static final Key PREF_GENERATE_CODE_COVERAGE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE);
+	private static final Key PREF_NO_NAMESPACE_CHECK = getPHPUnitKey(PHPUnitPreferenceNames.PREF_NO_NAMESPACE_CHECK);
 
 	public static final String TEST_FILE_PATTERN_FOLDER_DEFAULT = File.separatorChar
 			+ IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT
@@ -64,6 +65,7 @@ public class PHPUnitConfigurationBlock extends
 	protected Text fTestFilePatternFile;
 	protected Text fTestFileSuperClass;
 	protected Button fGenerateCodeCoverageCheckbox;
+	protected Button fNoNamespaceCheckCheckbox;
 
 	public PHPUnitConfigurationBlock(IStatusChangeListener context,
 			IProject project, IWorkbenchPreferenceContainer container) {
@@ -74,7 +76,8 @@ public class PHPUnitConfigurationBlock extends
 		return new Key[] { PREF_PHP_EXECUTABLE, PREF_PEAR_LIBRARY,
 				PREF_DEBUG_PRINT_OUTPUT, PREF_BOOSTRAP,
 				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE,
-				PREF_TEST_FILE_SUPER_CLASS, PREF_GENERATE_CODE_COVERAGE };
+				PREF_TEST_FILE_SUPER_CLASS, PREF_GENERATE_CODE_COVERAGE,
+				PREF_NO_NAMESPACE_CHECK };
 	}
 
 	protected Composite createToolContents(Composite parent) {
@@ -245,6 +248,25 @@ public class PHPUnitConfigurationBlock extends
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 3;
 		fGenerateCodeCoverageCheckbox.setLayoutData(data);
+
+		fNoNamespaceCheckCheckbox = new Button(phpUnitOptionsGroup, SWT.CHECK);
+		fNoNamespaceCheckCheckbox
+				.setText("Do not check for equal namespaces while searching for php/test case classes");
+		fNoNamespaceCheckCheckbox
+				.setSelection(getBooleanValue(PREF_NO_NAMESPACE_CHECK));
+		fNoNamespaceCheckCheckbox.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				boolean selection = fNoNamespaceCheckCheckbox.getSelection();
+				setValue(PREF_NO_NAMESPACE_CHECK, selection);
+			}
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalSpan = 3;
+		fNoNamespaceCheckCheckbox.setLayoutData(data);
 
 		return phpUnitOptionsGroup;
 	}

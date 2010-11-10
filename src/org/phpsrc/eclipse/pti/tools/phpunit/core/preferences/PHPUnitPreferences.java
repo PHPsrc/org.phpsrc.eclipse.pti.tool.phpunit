@@ -17,11 +17,13 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 	protected String testFilePatternFile;
 	protected String testFileSuperClass;
 	protected boolean generateCodeCoverage;
+	protected boolean noNamespaceCheck;
 
 	public PHPUnitPreferences(String phpExecutable, boolean printOutput,
 			String pearLibraryName, String bootstrap,
 			String testFilePatternFolder, String testFilePatternFile,
-			String testFileSuperClass, boolean generateCodeCoverage) {
+			String testFileSuperClass, boolean generateCodeCoverage,
+			boolean noNamespaceCheck) {
 		super(phpExecutable, printOutput, pearLibraryName);
 		this.bootstrap = bootstrap;
 		this.testFilePatternFolder = testFilePatternFolder;
@@ -31,6 +33,7 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 				|| "".equals(this.testFileSuperClass))
 			this.testFileSuperClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
 		this.generateCodeCoverage = generateCodeCoverage;
+		this.noNamespaceCheck = noNamespaceCheck;
 	}
 
 	public String getBootstrap() {
@@ -51,5 +54,9 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 
 	public boolean generateCodeCoverage() {
 		return generateCodeCoverage;
+	}
+
+	public boolean noNamespaceCheck() {
+		return noNamespaceCheck;
 	}
 }
