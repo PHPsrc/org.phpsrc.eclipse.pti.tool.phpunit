@@ -542,22 +542,17 @@ public class PHPUnit extends AbstractPHPTool {
 		if (isTestCase(file))
 			return file;
 
+		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
+
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
-		try {
-			IType[] types = module.getAllTypes();
-			if (types.length > 0) {
-
-				SearchMatch[] matches = PHPSearchEngine.findClass(
-						types[0].getElementName() + "Test",
-						PHPSearchEngine.createProjectScope(file.getProject()));
-
-				if (matches.length > 0)
-					return (IFile) matches[0].getResource();
+		if (module != null) {
+			String className = PHPUnitToolkitUtil.getClassName(module);
+			String namespace = PHPUnitToolkitUtil.getNamespace(module);
+			if (className != null) {
+				return searchClass(namespace, className + "Test",
+						file.getProject(), prefs.noNamespaceCheck());
 			}
-		} catch (ModelException e) {
-			Logger.logException(e);
 		}
-
 		return null;
 	}
 
@@ -565,21 +560,42 @@ public class PHPUnit extends AbstractPHPTool {
 		if (!isTestCase(testCase))
 			return testCase;
 
-		ISourceModule module = PHPToolkitUtil.getSourceModule(testCase);
-		try {
-			IType[] types = module.getAllTypes();
-			if (types.length > 0) {
-				String name = types[0].getElementName();
-				name = name.substring(0, name.length() - 4);
-				SearchMatch[] matches = PHPSearchEngine.findClass(name,
-						PHPSearchEngine.createProjectScope(testCase
-								.getProject()));
+		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(testCase);
 
-				if (matches.length > 0)
-					return (IFile) matches[0].getResource();
+		ISourceModule module = PHPToolkitUtil.getSourceModule(testCase);
+		if (module != null) {
+			String className = PHPUnitToolkitUtil.getClassName(module);
+			String namespace = PHPUnitToolkitUtil.getNamespace(module);
+
+			if (className != null) {
+				return searchClass(namespace,
+						className.substring(0, className.length() - 4),
+						testCase.getProject(), prefs.noNamespaceCheck());
 			}
-		} catch (ModelException e) {
-			Logger.logException(e);
+		}
+
+		return null;
+	}
+
+	static private IFile searchClass(String namespace, String className,
+			IProject project, boolean noNamespaceCheck) {
+		SearchMatch[] matches = PHPSearchEngine.findClass(className,
+				PHPSearchEngine.createProjectScope(project));
+
+		for (SearchMatch match : matches) {
+			if (noNamespaceCheck) {
+				return (IFile) match.getResource();
+			} else {
+				String matchNamespace = PHPUnitToolkitUtil
+						.getNamespace(((IType) match.getElement())
+								.getSourceModule());
+				if (namespace == null && matchNamespace == null) {
+					return (IFile) match.getResource();
+				} else if (namespace != null
+						&& namespace.equals(matchNamespace)) {
+					return (IFile) match.getResource();
+				}
+			}
 		}
 
 		return null;
@@ -591,12 +607,12 @@ public class PHPUnit extends AbstractPHPTool {
 		if (testCaseClass == null || "".equals(testCaseClass))
 			testCaseClass = PHPUNIT_TEST_CASE_CLASS;
 
-		return PHPToolkitUtil.hasSuperClass(file, testCaseClass);
+		return PHPUnitToolkitUtil.hasSuperClass(file, testCaseClass);
 	}
 
 	static public boolean isTestSuite(IFile file) {
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
-		if (PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
+		if (PHPUnitToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
 			return true;
 
 		try {
@@ -619,7 +635,7 @@ public class PHPUnit extends AbstractPHPTool {
 									.group(1), PHPSearchEngine
 									.createProjectScope(file.getProject()));
 							for (SearchMatch c : classes) {
-								if (PHPToolkitUtil.hasSuperClass(
+								if (PHPUnitToolkitUtil.hasSuperClass(
 										c.getResource(),
 										PHPUNIT_TEST_SUITE_CLASS))
 									return true;
