@@ -41,6 +41,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.php.internal.ui.SelectionProviderMediator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Composite;
@@ -51,13 +53,14 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestCaseElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement.Status;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestRoot;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestRunSession;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestSuiteElement;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement.Status;
 
 public class TestViewer {
-	private final class TestSelectionListener implements ISelectionChangedListener {
+	private final class TestSelectionListener implements
+			ISelectionChangedListener {
 		public void selectionChanged(SelectionChangedEvent event) {
 			handleSelected();
 		}
@@ -70,7 +73,8 @@ public class TestViewer {
 	}
 
 	private final class FailuresOnlyFilter extends ViewerFilter {
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
+		public boolean select(Viewer viewer, Object parentElement,
+				Object element) {
 			return select(((TestElement) element));
 		}
 
@@ -138,7 +142,8 @@ public class TestViewer {
 	private LinkedList/* <TestSuiteElement> */fAutoClose;
 	private HashSet/* <TestSuite> */fAutoExpand;
 
-	public TestViewer(Composite parent, Clipboard clipboard, TestRunnerViewPart runner) {
+	public TestViewer(Composite parent, Clipboard clipboard,
+			TestRunnerViewPart runner) {
 		fTestRunnerPart = runner;
 		fClipboard = clipboard;
 
@@ -158,19 +163,24 @@ public class TestViewer {
 		fTreeViewer.setUseHashlookup(true);
 		fTreeContentProvider = new TestSessionTreeContentProvider();
 		fTreeViewer.setContentProvider(fTreeContentProvider);
-		fTreeLabelProvider = new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_HIERARCHICAL);
+		fTreeLabelProvider = new TestSessionLabelProvider(fTestRunnerPart,
+				TestRunnerViewPart.LAYOUT_HIERARCHICAL);
 		fTreeViewer.setLabelProvider(fTreeLabelProvider);
 
-		fTableViewer = new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL | SWT.SINGLE);
+		fTableViewer = new TableViewer(fViewerbook, SWT.V_SCROLL | SWT.H_SCROLL
+				| SWT.SINGLE);
 		fTableViewer.setUseHashlookup(true);
 		fTableContentProvider = new TestSessionTableContentProvider();
 		fTableViewer.setContentProvider(fTableContentProvider);
-		fTableLabelProvider = new TestSessionLabelProvider(fTestRunnerPart, TestRunnerViewPart.LAYOUT_FLAT);
+		fTableLabelProvider = new TestSessionLabelProvider(fTestRunnerPart,
+				TestRunnerViewPart.LAYOUT_FLAT);
 		fTableViewer.setLabelProvider(fTableLabelProvider);
 
-		fSelectionProvider = new SelectionProviderMediator(new StructuredViewer[] { fTreeViewer, fTableViewer },
+		fSelectionProvider = new SelectionProviderMediator(
+				new StructuredViewer[] { fTreeViewer, fTableViewer },
 				fTreeViewer);
-		fSelectionProvider.addSelectionChangedListener(new TestSelectionListener());
+		fSelectionProvider
+				.addSelectionChangedListener(new TestSelectionListener());
 		TestOpenListener testOpenListener = new TestOpenListener();
 		fTreeViewer.getTree().addSelectionListener(testOpenListener);
 		fTableViewer.getTable().addSelectionListener(testOpenListener);
@@ -178,6 +188,36 @@ public class TestViewer {
 		fTestRunnerPart.getSite().setSelectionProvider(fSelectionProvider);
 
 		fViewerbook.showPage(fTreeViewer.getTree());
+
+		fTreeViewer.getTree().addMouseListener(new MouseListener() {
+			public void mouseUp(MouseEvent e) {
+			}
+
+			public void mouseDown(MouseEvent e) {
+			}
+
+			public void mouseDoubleClick(MouseEvent e) {
+				IStructuredSelection selection = (IStructuredSelection) fSelectionProvider
+						.getSelection();
+				if (!selection.isEmpty()) {
+					TestElement testElement = (TestElement) selection
+							.getFirstElement();
+
+					if (testElement instanceof TestSuiteElement) {
+						String testLabel = testElement.getTestName();
+						OpenTestAction action = new OpenTestAction(
+								fTestRunnerPart, testLabel);
+						action.run();
+					} else if (testElement instanceof TestCaseElement) {
+
+						TestCaseElement testCaseElement = (TestCaseElement) testElement;
+						OpenTestAction action = new OpenTestAction(
+								fTestRunnerPart, testCaseElement);
+						action.run();
+					}
+				}
+			}
+		});
 	}
 
 	private void initContextMenu() {
@@ -188,14 +228,16 @@ public class TestViewer {
 				handleMenuAboutToShow(manager);
 			}
 		});
-		fTestRunnerPart.getSite().registerContextMenu(menuMgr, fSelectionProvider);
+		fTestRunnerPart.getSite().registerContextMenu(menuMgr,
+				fSelectionProvider);
 		Menu menu = menuMgr.createContextMenu(fViewerbook);
 		fTreeViewer.getTree().setMenu(menu);
 		fTableViewer.getTable().setMenu(menu);
 	}
 
 	void handleMenuAboutToShow(IMenuManager manager) {
-		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider
+				.getSelection();
 		if (!selection.isEmpty()) {
 			TestElement testElement = (TestElement) selection.getFirstElement();
 
@@ -205,26 +247,33 @@ public class TestViewer {
 			if (testElement instanceof TestSuiteElement) {
 				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
 				manager.add(new Separator());
-				if (testClassExists(className) && !fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(PHPUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement
-							.getId(), className, null, ILaunchManager.RUN_MODE));
+				if (testClassExists(className)
+						&& !fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					manager.add(new RerunAction(
+							PHPUnitMessages.RerunAction_label_run,
+							fTestRunnerPart, testElement.getId(), className,
+							null, ILaunchManager.RUN_MODE));
 					// manager.add(new
 					// RerunAction(PHPUnitMessages.RerunAction_label_debug,
 					// fTestRunnerPart, testElement
 					// .getId(), className, null, ILaunchManager.DEBUG_MODE));
 				}
-			} else {
+			} else if (testElement instanceof TestCaseElement) {
 				TestCaseElement testCaseElement = (TestCaseElement) testElement;
 				String testMethodName = testCaseElement.getTestMethodName();
 				manager.add(new OpenTestAction(fTestRunnerPart, testCaseElement));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(PHPUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testElement
-							.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(
+							PHPUnitMessages.RerunAction_label_rerun,
+							fTestRunnerPart, testElement.getId(), className,
+							testMethodName, ILaunchManager.RUN_MODE));
 
 				} else {
-					manager.add(new RerunAction(PHPUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement
-							.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(
+							PHPUnitMessages.RerunAction_label_run,
+							fTestRunnerPart, testElement.getId(), className,
+							testMethodName, ILaunchManager.RUN_MODE));
 				}
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
@@ -233,13 +282,16 @@ public class TestViewer {
 			}
 
 		}
-		if (fTestRunSession != null && fTestRunSession.getFailureCount() + fTestRunSession.getErrorCount() > 0) {
+		if (fTestRunSession != null
+				&& fTestRunSession.getFailureCount()
+						+ fTestRunSession.getErrorCount() > 0) {
 			if (fLayoutMode != TestRunnerViewPart.LAYOUT_HIERARCHICAL)
 				manager.add(new Separator());
 			manager.add(new CopyFailureListAction(fTestRunnerPart, fClipboard));
 		}
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
+				+ "-end")); //$NON-NLS-1$
 	}
 
 	private boolean testClassExists(String className) {
@@ -266,7 +318,8 @@ public class TestViewer {
 	}
 
 	void handleDefaultSelected() {
-		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider
+				.getSelection();
 		if (selection.size() != 1)
 			return;
 
@@ -288,7 +341,8 @@ public class TestViewer {
 	}
 
 	private void handleSelected() {
-		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) fSelectionProvider
+				.getSelection();
 		TestElement testElement = null;
 		if (selection.size() == 1) {
 			testElement = (TestElement) selection.getFirstElement();
@@ -306,7 +360,8 @@ public class TestViewer {
 		}
 	}
 
-	public synchronized void setShowFailuresOnly(boolean failuresOnly, int layoutMode) {
+	public synchronized void setShowFailuresOnly(boolean failuresOnly,
+			int layoutMode) {
 		/*
 		 * Management of fTreeViewer and fTableViewer
 		 * ****************************************** - invisible viewer is
@@ -321,7 +376,8 @@ public class TestViewer {
 			IStructuredSelection selection = null;
 			boolean switchLayout = layoutMode != fLayoutMode;
 			if (switchLayout) {
-				selection = (IStructuredSelection) fSelectionProvider.getSelection();
+				selection = (IStructuredSelection) fSelectionProvider
+						.getSelection();
 				if (layoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 					if (fTreeNeedsRefresh) {
 						clearUpdateAndExpansion();
@@ -359,7 +415,8 @@ public class TestViewer {
 				// workaround for
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=125708
 				// (ITreeSelection not adapted if TreePaths changed):
-				StructuredSelection flatSelection = new StructuredSelection(selection.toList());
+				StructuredSelection flatSelection = new StructuredSelection(
+						selection.toList());
 				fSelectionProvider.setSelection(flatSelection, true);
 			}
 
@@ -439,7 +496,8 @@ public class TestViewer {
 					HashSet toUpdateWithParents = new HashSet();
 					toUpdateWithParents.addAll(Arrays.asList(toUpdate));
 					for (int i = 0; i < toUpdate.length; i++) {
-						TestElement parent = ((TestElement) toUpdate[i]).getParent();
+						TestElement parent = ((TestElement) toUpdate[i])
+								.getParent();
 						while (parent != null) {
 							toUpdateWithParents.add(parent);
 							parent = parent.getParent();
@@ -500,7 +558,8 @@ public class TestViewer {
 				TestElement previous = getNextFailure(element, false);
 				int insertionIndex = -1;
 				if (previous != null) {
-					TableItem item = (TableItem) fTableViewer.testFindItem(previous);
+					TableItem item = (TableItem) fTableViewer
+							.testFindItem(previous);
 					if (item != null)
 						insertionIndex = fTableViewer.getTable().indexOf(item);
 				}
@@ -541,11 +600,14 @@ public class TestViewer {
 		TestCaseElement current = fAutoScrollTarget;
 		fAutoScrollTarget = null;
 
-		TestSuiteElement parent = current == null ? null : (TestSuiteElement) fTreeContentProvider.getParent(current);
+		TestSuiteElement parent = current == null ? null
+				: (TestSuiteElement) fTreeContentProvider.getParent(current);
 		if (fAutoClose.isEmpty() || !fAutoClose.getLast().equals(parent)) {
 			// we're in a new branch, so let's close old OK branches:
-			for (ListIterator iter = fAutoClose.listIterator(fAutoClose.size()); iter.hasPrevious();) {
-				TestSuiteElement previousAutoOpened = (TestSuiteElement) iter.previous();
+			for (ListIterator iter = fAutoClose.listIterator(fAutoClose.size()); iter
+					.hasPrevious();) {
+				TestSuiteElement previousAutoOpened = (TestSuiteElement) iter
+						.previous();
 				if (previousAutoOpened.equals(parent))
 					break;
 
@@ -553,15 +615,18 @@ public class TestViewer {
 					// auto-opened the element, and all children are OK -> auto
 					// close
 					iter.remove();
-					fTreeViewer.collapseToLevel(previousAutoOpened, AbstractTreeViewer.ALL_LEVELS);
+					fTreeViewer.collapseToLevel(previousAutoOpened,
+							AbstractTreeViewer.ALL_LEVELS);
 				}
 			}
 
-			while (parent != null && !fTestRunSession.getTestRoot().equals(parent)
+			while (parent != null
+					&& !fTestRunSession.getTestRoot().equals(parent)
 					&& fTreeViewer.getExpandedState(parent) == false) {
 				fAutoClose.add(parent); // add to auto-opened elements -> close
 				// later if STATUS_OK
-				parent = (TestSuiteElement) fTreeContentProvider.getParent(parent);
+				parent = (TestSuiteElement) fTreeContentProvider
+						.getParent(parent);
 			}
 		}
 		if (current != null)
@@ -569,13 +634,16 @@ public class TestViewer {
 	}
 
 	public void selectFirstFailure() {
-		TestCaseElement firstFailure = getNextChildFailure(fTestRunSession.getTestRoot(), true);
+		TestCaseElement firstFailure = getNextChildFailure(
+				fTestRunSession.getTestRoot(), true);
 		if (firstFailure != null)
-			getActiveViewer().setSelection(new StructuredSelection(firstFailure), true);
+			getActiveViewer().setSelection(
+					new StructuredSelection(firstFailure), true);
 	}
 
 	public void selectFailure(boolean showNext) {
-		IStructuredSelection selection = (IStructuredSelection) getActiveViewer().getSelection();
+		IStructuredSelection selection = (IStructuredSelection) getActiveViewer()
+				.getSelection();
 		TestElement selected = (TestElement) selection.getFirstElement();
 		TestElement next;
 
@@ -591,14 +659,16 @@ public class TestViewer {
 
 	private TestElement getNextFailure(TestElement selected, boolean showNext) {
 		if (selected instanceof TestSuiteElement) {
-			TestElement nextChild = getNextChildFailure((TestSuiteElement) selected, showNext);
+			TestElement nextChild = getNextChildFailure(
+					(TestSuiteElement) selected, showNext);
 			if (nextChild != null)
 				return nextChild;
 		}
 		return getNextFailureSibling(selected, showNext);
 	}
 
-	private TestCaseElement getNextFailureSibling(TestElement current, boolean showNext) {
+	private TestCaseElement getNextFailureSibling(TestElement current,
+			boolean showNext) {
 		TestSuiteElement parent = current.getParent();
 		if (parent == null)
 			return null;
@@ -614,14 +684,16 @@ public class TestViewer {
 				if (sibling instanceof TestCaseElement) {
 					return (TestCaseElement) sibling;
 				} else {
-					return getNextChildFailure((TestSuiteElement) sibling, showNext);
+					return getNextChildFailure((TestSuiteElement) sibling,
+							showNext);
 				}
 			}
 		}
 		return getNextFailureSibling(parent, showNext);
 	}
 
-	private TestCaseElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
+	private TestCaseElement getNextChildFailure(TestSuiteElement root,
+			boolean showNext) {
 		List children = Arrays.asList(root.getChildren());
 		if (!showNext)
 			children = new ReverseList(children);
@@ -631,7 +703,8 @@ public class TestViewer {
 				if (child instanceof TestCaseElement) {
 					return (TestCaseElement) child;
 				} else {
-					return getNextChildFailure((TestSuiteElement) child, showNext);
+					return getNextChildFailure((TestSuiteElement) child,
+							showNext);
 				}
 			}
 		}
