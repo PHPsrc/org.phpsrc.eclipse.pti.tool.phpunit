@@ -546,8 +546,8 @@ public class PHPUnit extends AbstractPHPTool {
 
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
 		if (module != null) {
-			String className = PHPUnitToolkitUtil.getClassName(module);
-			String namespace = PHPUnitToolkitUtil.getNamespace(module);
+			String className = PHPToolkitUtil.getClassName(module);
+			String namespace = PHPToolkitUtil.getNamespace(module);
 			if (className != null) {
 				return searchClass(namespace, className + "Test",
 						file.getProject(), prefs.noNamespaceCheck());
@@ -564,8 +564,8 @@ public class PHPUnit extends AbstractPHPTool {
 
 		ISourceModule module = PHPToolkitUtil.getSourceModule(testCase);
 		if (module != null) {
-			String className = PHPUnitToolkitUtil.getClassName(module);
-			String namespace = PHPUnitToolkitUtil.getNamespace(module);
+			String className = PHPToolkitUtil.getClassName(module);
+			String namespace = PHPToolkitUtil.getNamespace(module);
 
 			if (className != null) {
 				return searchClass(namespace,
@@ -586,7 +586,7 @@ public class PHPUnit extends AbstractPHPTool {
 			if (noNamespaceCheck) {
 				return (IFile) match.getResource();
 			} else {
-				String matchNamespace = PHPUnitToolkitUtil
+				String matchNamespace = PHPToolkitUtil
 						.getNamespace(((IType) match.getElement())
 								.getSourceModule());
 				if (namespace == null && matchNamespace == null) {
@@ -607,12 +607,12 @@ public class PHPUnit extends AbstractPHPTool {
 		if (testCaseClass == null || "".equals(testCaseClass))
 			testCaseClass = PHPUNIT_TEST_CASE_CLASS;
 
-		return PHPUnitToolkitUtil.hasSuperClass(file, testCaseClass);
+		return PHPToolkitUtil.hasSuperClass(file, testCaseClass);
 	}
 
 	static public boolean isTestSuite(IFile file) {
 		ISourceModule module = PHPToolkitUtil.getSourceModule(file);
-		if (PHPUnitToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
+		if (PHPToolkitUtil.hasSuperClass(module, PHPUNIT_TEST_SUITE_CLASS))
 			return true;
 
 		try {
@@ -635,7 +635,7 @@ public class PHPUnit extends AbstractPHPTool {
 									.group(1), PHPSearchEngine
 									.createProjectScope(file.getProject()));
 							for (SearchMatch c : classes) {
-								if (PHPUnitToolkitUtil.hasSuperClass(
+								if (PHPToolkitUtil.hasSuperClass(
 										c.getResource(),
 										PHPUNIT_TEST_SUITE_CLASS))
 									return true;

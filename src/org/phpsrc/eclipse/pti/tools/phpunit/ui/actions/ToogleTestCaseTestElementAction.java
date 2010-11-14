@@ -14,9 +14,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
+import org.phpsrc.eclipse.pti.core.PHPToolkitUtil;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitToolkitUtil;
 
 public class ToogleTestCaseTestElementAction implements
 		IWorkbenchWindowActionDelegate {
@@ -43,7 +43,7 @@ public class ToogleTestCaseTestElementAction implements
 						}
 
 						if (!openFile(page, targetFile)) {
-							String sourceClassName = PHPUnitToolkitUtil
+							String sourceClassName = PHPToolkitUtil
 									.getClassNameWithNamespace(file);
 							if (sourceClassName == null)
 								sourceClassName = "unknown";
