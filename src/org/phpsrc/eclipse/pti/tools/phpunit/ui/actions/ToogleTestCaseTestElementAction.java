@@ -36,24 +36,40 @@ public class ToogleTestCaseTestElementAction implements
 						String errorMsg = null;
 						if (PHPUnit.isTestCase(file)) {
 							targetFile = PHPUnit.searchTestElement(file);
-							errorMsg = "Can't find php class for test case class ";
+							if (!openFile(page, targetFile)) {
+								String sourceClassName = PHPToolkitUtil
+										.getClassNameWithNamespace(file);
+								if (sourceClassName == null)
+									sourceClassName = "unknown";
+
+								String targetClass = sourceClassName.substring(
+										0, sourceClassName.length() - 4);
+								errorMsg = "Can't find php class '"
+										+ targetClass
+										+ "' for test case class '"
+										+ sourceClassName + "'";
+								MessageDialog.openError(PHPToolCorePlugin
+										.getActiveWorkbenchShell(), "Error",
+										errorMsg);
+							}
 						} else {
 							targetFile = PHPUnit.searchTestCase(file);
-							errorMsg = "Can't find test case class for php class ";
+							if (!openFile(page, targetFile)) {
+								String sourceClassName = PHPToolkitUtil
+										.getClassNameWithNamespace(file);
+								if (sourceClassName == null)
+									sourceClassName = "unknown";
+
+								errorMsg = "Can't find test case class '"
+										+ sourceClassName
+										+ "Test' for php class '"
+										+ sourceClassName + "'";
+								MessageDialog.openError(PHPToolCorePlugin
+										.getActiveWorkbenchShell(), "Error",
+										errorMsg);
+							}
 						}
 
-						if (!openFile(page, targetFile)) {
-							String sourceClassName = PHPToolkitUtil
-									.getClassNameWithNamespace(file);
-							if (sourceClassName == null)
-								sourceClassName = "unknown";
-
-							MessageDialog
-									.openError(PHPToolCorePlugin
-											.getActiveWorkbenchShell(),
-											"Error", errorMsg + "'"
-													+ sourceClassName + "'");
-						}
 					}
 				}
 			}
