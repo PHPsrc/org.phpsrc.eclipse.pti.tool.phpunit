@@ -23,8 +23,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.internal.core.SourceType;
@@ -57,7 +55,6 @@ import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
-import org.phpsrc.eclipse.pti.ui.Logger;
 
 @SuppressWarnings("restriction")
 public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
@@ -376,6 +373,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		if (selection != null && !selection.isEmpty()
 				&& selection instanceof IStructuredSelection) {
 			final IStructuredSelection ssel = (IStructuredSelection) selection;
+
 			if (ssel.size() > 1) {
 				return;
 			}
@@ -397,25 +395,20 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 			if (container != null) {
 				fContainer.setText(container.getFullPath().toOSString());
 				this.project = container.getProject();
+
+				preferences = PHPUnitPreferencesFactory.factory(this.project);
 			}
-		} else {
+		}
+
+		if (preferences == null) {
 			preferences = PHPUnitPreferencesFactory.factoryGlobal();
 		}
 
 		if (selection != null) {
-			Object element = selection.getFirstElement();
-			ISourceModule module = PHPToolkitUtil.getSourceModule(element);
+			ISourceModule module = PHPToolkitUtil.getSourceModule(selection
+					.getFirstElement());
 			if (module != null) {
-				IType[] types;
-				try {
-					types = module.getAllTypes();
-					if (types != null && types.length > 0) {
-						this.setSourceClassName(types[0].getElementName(),
-								types[0].getResource());
-					}
-				} catch (ModelException e1) {
-					Logger.logException(e1);
-				}
+				this.setSourceClassName(PHPToolkitUtil.getClassName(module));
 			}
 		}
 
