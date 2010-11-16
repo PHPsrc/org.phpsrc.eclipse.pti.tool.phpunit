@@ -23,8 +23,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.dltk.core.ISourceModule;
-import org.eclipse.dltk.core.IType;
-import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.internal.core.SourceType;
@@ -58,7 +56,6 @@ import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
-import org.phpsrc.eclipse.pti.ui.Logger;
 
 @SuppressWarnings("restriction")
 public class PHPClassCreationWizardPage extends WizardPage {
@@ -185,7 +182,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			public void widgetSelected(final SelectionEvent e) {
 				handleClassSearch(new IClassSearchListener() {
 					public void handleSearchMatch(PHPSearchMatch match) {
-						fSuperClass.setText(match.getElement().getElementName());
+						fSuperClass
+								.setText(match.getElement().getElementName());
 					}
 				});
 			}
@@ -219,14 +217,16 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		});
 
 		Label folderInfoLabel = new Label(folderLabelGroup, SWT.NULL);
-		folderInfoLabel.setText("Path must start with a project like " + File.separatorChar + "<project>"
-				+ File.separatorChar + "<folder 1>" + File.separatorChar + "<folder 2>");
+		folderInfoLabel.setText("Path must start with a project like "
+				+ File.separatorChar + "<project>" + File.separatorChar
+				+ "<folder 1>" + File.separatorChar + "<folder 2>");
 		folderInfoLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		makeFontItalic(folderInfoLabel);
 
 		Button containerButton = new Button(fileGroup, SWT.PUSH);
 		containerButton.setText("Browse...");
-		containerButton.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_BEGINNING));
+		containerButton.setLayoutData(new GridData(
+				GridData.VERTICAL_ALIGN_BEGINNING));
 		containerButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent e) {
 				handleContainerBrowse();
@@ -296,21 +296,28 @@ public class PHPClassCreationWizardPage extends WizardPage {
 				patternProject = path.substring(1, firstSeparator);
 				int lastSeparator = path.lastIndexOf(File.separatorChar);
 				if (firstSeparator + 1 < lastSeparator)
-					patternPath = path.substring(firstSeparator + 1, lastSeparator);
+					patternPath = path.substring(firstSeparator + 1,
+							lastSeparator);
 			} else {
 				patternProject = path;
 			}
 
-			String targetFolder = File.separatorChar + patternProject + File.separatorChar + patternPath;
+			String targetFolder = File.separatorChar + patternProject
+					+ File.separatorChar + patternPath;
 
-			patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT, "([^"
-					+ File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
-			patternFolder = patternFolder.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR, "(.+)"); //$NON-NLS-1$
+			patternFolder = patternFolder.replace(
+					IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
+					"([^" + File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
+			patternFolder = patternFolder
+					.replace(
+							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR,
+							"(.+)"); //$NON-NLS-1$
 			patternFolder = patternFolder.replace("\\", "\\\\"); //$NON-NLS-1$  //$NON-NLS-2$
 			Pattern p = Pattern.compile(patternFolder);
 			Matcher m = p.matcher(targetFolder);
 			if (m.matches()) {
-				targetFolder = File.separatorChar + m.group(1) + File.separatorChar + m.group(2);
+				targetFolder = File.separatorChar + m.group(1)
+						+ File.separatorChar + m.group(2);
 			}
 
 			fContainer.setText(targetFolder);
@@ -321,9 +328,13 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			String fileName = resource.getName();
 
 			patternFile = patternFile.replace(".", "\\."); //$NON-NLS-1$ //$NON-NLS-2$
-			patternFile = patternFile.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME, "(.+)"); //$NON-NLS-1$
+			patternFile = patternFile.replace(
+					IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME,
+					"(.+)"); //$NON-NLS-1$
 			patternFile = patternFile
-					.replace(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION, "([^.]+)"); //$NON-NLS-1$
+					.replace(
+							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION,
+							"([^.]+)"); //$NON-NLS-1$
 			p = Pattern.compile(patternFile);
 			m = p.matcher(fileName);
 			if (m.matches()) {
@@ -338,8 +349,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	 * Tests if the current workbench selection is a suitable container to use.
 	 */
 	private void initialize() {
-		if (selection != null && !selection.isEmpty() && selection instanceof IStructuredSelection) {
+		if (selection != null && !selection.isEmpty()
+				&& selection instanceof IStructuredSelection) {
 			final IStructuredSelection ssel = (IStructuredSelection) selection;
+
 			if (ssel.size() > 1) {
 				return;
 			}
@@ -361,24 +374,20 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			if (container != null) {
 				fContainer.setText(container.getFullPath().toOSString());
 				this.project = container.getProject();
+
+				preferences = PHPUnitPreferencesFactory.factory(this.project);
 			}
-		} else {
+		}
+
+		if (preferences == null) {
 			preferences = PHPUnitPreferencesFactory.factoryGlobal();
 		}
 
 		if (selection != null) {
-			Object element = selection.getFirstElement();
-			ISourceModule module = PHPToolkitUtil.getSourceModule(element);
+			ISourceModule module = PHPToolkitUtil.getSourceModule(selection
+					.getFirstElement());
 			if (module != null) {
-				IType[] types;
-				try {
-					types = module.getAllTypes();
-					if (types != null && types.length > 0) {
-						setTestCaseClassName(types[0].getElementName(), types[0].getResource());
-					}
-				} catch (ModelException e1) {
-					Logger.logException(e1);
-				}
+				this.setTestCaseClassName(PHPToolkitUtil.getClassName(module));
 			}
 		}
 	}
@@ -388,8 +397,9 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	 * the container field.
 	 */
 	private void handleContainerBrowse() {
-		final ContainerSelectionDialog dialog = new ContainerSelectionDialog(getShell(), ResourcesPlugin.getWorkspace()
-				.getRoot(), false, "Select Test File Folder");
+		final ContainerSelectionDialog dialog = new ContainerSelectionDialog(
+				getShell(), ResourcesPlugin.getWorkspace().getRoot(), false,
+				"Select Test File Folder");
 		dialog.showClosedProjects(false);
 		if (dialog.open() == Window.OK) {
 			final Object[] result = dialog.getResult();
@@ -399,7 +409,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	}
 
 	private void handleClassSearch(IClassSearchListener listener) {
-		FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(getShell(), false);
+		FilteredPHPClassSelectionDialog dialog = new FilteredPHPClassSelectionDialog(
+				getShell(), false);
 		if (dialog.open() == Window.OK) {
 			PHPSearchMatch result = (PHPSearchMatch) dialog.getFirstResult();
 			if (result != null && result.getElement() != null)
@@ -413,7 +424,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	protected void dialogChanged() {
 		testFileExists = false;
 
-		if (preferences == null || preferences.getPhpExecutable() == null || "".equals(preferences.getPhpExecutable())) {
+		if (preferences == null || preferences.getPhpExecutable() == null
+				|| "".equals(preferences.getPhpExecutable())) {
 			updateStatus("No preferences found. Please check your PHPUnit configuration.");
 			return;
 		}
@@ -433,7 +445,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 
 		final IContainer containerFolder = getContainer(container);
 		if (containerFolder == null || !containerFolder.exists()) {
-			setMessage("Selected folder does not exist and will be created", WizardPage.INFORMATION);
+			setMessage("Selected folder does not exist and will be created",
+					WizardPage.INFORMATION);
 		} else {
 			if (containerFolder.getProject() == null) {
 				updateStatus("Project must be specified within Target Folder");
@@ -445,8 +458,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 				return;
 			}
 
-			if (fileName != null && !fileName.equals("") && containerFolder.getFile(new Path(fileName)).exists()) { //$NON-NLS-1$
-				setMessage("File exists and will be combined", WizardPage.INFORMATION);
+			if (fileName != null
+					&& !fileName.equals("") && containerFolder.getFile(new Path(fileName)).exists()) { //$NON-NLS-1$
+				setMessage("File exists and will be combined",
+						WizardPage.INFORMATION);
 				testFileExists = true;
 			}
 		}
@@ -455,10 +470,12 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		String projectName = null;
 		if (container != null && container.length() > 0) {
 			if (container.indexOf(java.io.File.separatorChar, 1) > 0)
-				projectName = container.substring(1, container.indexOf(java.io.File.separatorChar, 1));
+				projectName = container.substring(1,
+						container.indexOf(java.io.File.separatorChar, 1));
 			else
 				projectName = container.substring(1);
-			IContainer projectContainer = getContainer(java.io.File.separatorChar + projectName);
+			IContainer projectContainer = getContainer(java.io.File.separatorChar
+					+ projectName);
 			if (projectContainer != null)
 				this.project = projectContainer.getProject();
 		}
@@ -488,13 +505,15 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			}
 		}
 
-		final IContentType contentType = Platform.getContentTypeManager().getContentType(
-				IPHPCoreConstants.ContentTypeID_PHP);
+		final IContentType contentType = Platform.getContentTypeManager()
+				.getContentType(IPHPCoreConstants.ContentTypeID_PHP);
 		if (!contentType.isAssociatedWith(fileName)) {
 			// fixed bug 195274
 			// get the extensions from content type
-			final String[] fileExtensions = contentType.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
-			StringBuffer buffer = new StringBuffer("The file name must end in one of the following extensions [");
+			final String[] fileExtensions = contentType
+					.getFileSpecs(IContentType.FILE_EXTENSION_SPEC);
+			StringBuffer buffer = new StringBuffer(
+					"The file name must end in one of the following extensions [");
 			buffer.append(fileExtensions[0]);
 			for (String extension : fileExtensions) {
 				buffer.append(", ").append(extension); //$NON-NLS-1$
@@ -510,7 +529,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	protected IContainer getContainer(final String text) {
 		final Path path = new Path(text);
 
-		final IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+		final IResource resource = ResourcesPlugin.getWorkspace().getRoot()
+				.findMember(path);
 		return resource instanceof IContainer ? (IContainer) resource : null;
 
 	}
@@ -521,18 +541,22 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	}
 
 	public boolean setTestCaseClassName(String className) {
-		return setTestCaseClassName(className, PHPSearchEngine.createWorkspaceScope(), null);
+		return setTestCaseClassName(className,
+				PHPSearchEngine.createWorkspaceScope(), null);
 	}
 
 	public boolean setTestCaseClassName(String className, IResource classFile) {
-		return setTestCaseClassName(className, PHPSearchEngine.createProjectScope(classFile.getProject()), classFile);
+		return setTestCaseClassName(className,
+				PHPSearchEngine.createProjectScope(classFile.getProject()),
+				classFile);
 	}
 
 	public boolean setTestCaseClassName(String className, IDLTKSearchScope scope) {
 		return setTestCaseClassName(className, scope, null);
 	}
 
-	protected boolean setTestCaseClassName(String className, IDLTKSearchScope scope, IResource classFile) {
+	protected boolean setTestCaseClassName(String className,
+			IDLTKSearchScope scope, IResource classFile) {
 		SearchMatch[] matches = PHPSearchEngine.findClass(className, scope);
 
 		if (matches.length > 0) {
