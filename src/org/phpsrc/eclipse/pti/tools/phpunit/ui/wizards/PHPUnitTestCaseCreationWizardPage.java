@@ -265,11 +265,13 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		Assert.isNotNull(type);
 		Assert.isNotNull(resource);
 
-		fClassName.setText(PHPToolkitUtil.getClassNameWithNamespace(type
-				.getSourceModule()));
+		String className = PHPToolkitUtil.getClassNameWithNamespace(type
+				.getSourceModule());
+
+		fClassName.setText(className);
 		fClassPath.setText(resource.getFullPath().toOSString());
 		fClassFile = (IFile) resource;
-		fTestClassName.setText(type.getElementName() + "Test");
+		fTestClassName.setText(className + "Test");
 
 		String patternFolder = null;
 		String patternFile = null;
