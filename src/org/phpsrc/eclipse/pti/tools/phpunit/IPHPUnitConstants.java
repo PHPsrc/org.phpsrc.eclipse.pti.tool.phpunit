@@ -22,5 +22,6 @@ public interface IPHPUnitConstants {
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_PROJECT = "%p";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_DIR = "%d";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILENAME = "%f";
+	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILENAME_LONG = "%ff";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION = "%e";
 }
