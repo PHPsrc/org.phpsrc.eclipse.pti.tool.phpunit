@@ -289,6 +289,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		String patternPath = "";
 
 		String path = type.getPath().toOSString();
+
 		int firstSeparator = path.indexOf(File.separatorChar, 1);
 		if (firstSeparator > 0) {
 			patternProject = path.substring(1, firstSeparator);
@@ -333,6 +334,9 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 				String folderSubstring = "";
 				for (int i = start; i <= end; ++i) {
+					if (i > folderParts.length)
+						break;
+
 					if (folderSubstring.length() > 0) {
 						folderSubstring += File.separatorChar;
 					}
@@ -345,7 +349,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				patternFolder = patternFolder
 						.replaceFirst(
 								Pattern.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR),
-								patternPath);
+								patternPath.replace("\\", "\\\\"));
 			}
 		}
 
