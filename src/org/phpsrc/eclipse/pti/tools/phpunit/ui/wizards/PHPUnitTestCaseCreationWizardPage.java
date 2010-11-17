@@ -358,6 +358,9 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		int firstDotPos = fileName.indexOf(".");
 		int lastDotPos = fileName.lastIndexOf(".");
 		patternFile = patternFile.replace(
+				IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME_LONG,
+				fileName.substring(0, lastDotPos));
+		patternFile = patternFile.replace(
 				IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME,
 				fileName.substring(0, firstDotPos));
 		patternFile = patternFile.replace(

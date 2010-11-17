@@ -196,7 +196,11 @@ public class PHPUnitConfigurationBlock extends
 		Label testFilePatternFileInfoLabel = new Label(testFilePatternGroup,
 				SWT.NONE);
 		testFilePatternFileInfoLabel
-				.setText("Use placeholder %f for filename without extension and %e for file extension.");
+				.setText("Use placeholder %f for short filename or %ff for long filename without extension and %e for file extension."
+						+ "\nExamples for part1.part2.part3.php"
+						+ "\n%f = part1"
+						+ "\n%ff = part1.part2.part3"
+						+ "\n%e = php");
 		GridData fileInfoData = new GridData(GridData.FILL_HORIZONTAL);
 		fileInfoData.horizontalSpan = 3;
 		testFilePatternFileInfoLabel.setLayoutData(fileInfoData);

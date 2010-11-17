@@ -328,6 +328,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			String fileName = resource.getName();
 
 			patternFile = patternFile.replace(".", "\\."); //$NON-NLS-1$ //$NON-NLS-2$
+			patternFile = patternFile
+					.replace(
+							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME_LONG,
+							"(.+)"); //$NON-NLS-1$
 			patternFile = patternFile.replace(
 					IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILENAME,
 					"(.+)"); //$NON-NLS-1$
@@ -335,6 +339,7 @@ public class PHPClassCreationWizardPage extends WizardPage {
 					.replace(
 							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION,
 							"([^.]+)"); //$NON-NLS-1$
+
 			p = Pattern.compile(patternFile);
 			m = p.matcher(fileName);
 			if (m.matches()) {
