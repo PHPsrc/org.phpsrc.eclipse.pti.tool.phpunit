@@ -265,7 +265,8 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		Assert.isNotNull(type);
 		Assert.isNotNull(resource);
 
-		fClassName.setText(type.getElementName());
+		fClassName.setText(PHPToolkitUtil.getClassNameWithNamespace(type
+				.getSourceModule()));
 		fClassPath.setText(resource.getFullPath().toOSString());
 		fClassFile = (IFile) resource;
 		fTestClassName.setText(type.getElementName() + "Test");
