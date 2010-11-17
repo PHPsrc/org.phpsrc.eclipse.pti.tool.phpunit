@@ -216,14 +216,8 @@ public class PHPUnit extends AbstractPHPTool {
 				}
 			}
 		} else {
-			StringBuffer failures = new StringBuffer();
-
-			Matcher m = Pattern.compile("Fatal error: .*").matcher(output);
-			while (m.find()) {
-				failures.append(m.group(0));
-			}
-
-			throw new PHPUnitException(failures.toString());
+			int pos = output.indexOf("Sebastian Bergmann.");
+			throw new PHPUnitException(output.substring(pos + 20).trim());
 		}
 	}
 
