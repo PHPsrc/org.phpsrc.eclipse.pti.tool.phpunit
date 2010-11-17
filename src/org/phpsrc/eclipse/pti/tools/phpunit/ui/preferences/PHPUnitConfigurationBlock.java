@@ -235,7 +235,7 @@ public class PHPUnitConfigurationBlock extends
 		fGenerateCodeCoverageCheckbox = new Button(phpUnitOptionsGroup,
 				SWT.CHECK);
 		fGenerateCodeCoverageCheckbox
-				.setText("Generate code coverage (Xdebug needed)");
+				.setText("Generate code coverage (need Xdebug PHP extension)");
 		fGenerateCodeCoverageCheckbox
 				.setSelection(getBooleanValue(PREF_GENERATE_CODE_COVERAGE));
 		fGenerateCodeCoverageCheckbox
