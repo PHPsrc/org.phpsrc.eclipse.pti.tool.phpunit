@@ -266,11 +266,13 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		Assert.isNotNull(resource);
 
 		if (resource instanceof IFile && PHPUnit.isTestCase((IFile) resource)) {
-			fClassName.setText(type.getElementName());
+			String className = PHPToolkitUtil.getClassNameWithNamespace(type
+					.getSourceModule());
+
+			fClassName.setText(className);
 			fClassPath.setText(resource.getFullPath().toOSString());
 			fClassFile = (IFile) resource;
 
-			String className = type.getElementName();
 			if (className.endsWith("Test"))
 				className = className.substring(0, className.length() - 4);
 			fTestClassName.setText(className);
@@ -305,6 +307,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			String targetFolder = File.separatorChar + patternProject
 					+ File.separatorChar + patternPath;
 
+			if (patternFolder.charAt(patternFolder.length() - 1) == File.separatorChar)
+				patternFolder = patternFolder.substring(0,
+						patternFolder.length() - 1);
+
 			patternFolder = patternFolder.replace(
 					IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
 					"([^" + File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
@@ -313,6 +319,7 @@ public class PHPClassCreationWizardPage extends WizardPage {
 							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR,
 							"(.+)"); //$NON-NLS-1$
 			patternFolder = patternFolder.replace("\\", "\\\\"); //$NON-NLS-1$  //$NON-NLS-2$
+
 			Pattern p = Pattern.compile(patternFolder);
 			Matcher m = p.matcher(targetFolder);
 			if (m.matches()) {
