@@ -13,10 +13,14 @@ import java.io.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.window.Window;
 import org.eclipse.php.internal.ui.preferences.IStatusChangeListener;
 import org.eclipse.php.internal.ui.preferences.util.Key;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -36,6 +40,7 @@ import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 
+@SuppressWarnings("restriction")
 public class PHPUnitConfigurationBlock extends
 		AbstractPEARPHPToolConfigurationBlock {
 
@@ -44,6 +49,7 @@ public class PHPUnitConfigurationBlock extends
 	private static final Key PREF_DEBUG_PRINT_OUTPUT = getPHPUnitKey(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT);
 	private static final Key PREF_BOOSTRAP = getPHPUnitKey(PHPUnitPreferenceNames.PREF_BOOTSTRAP);
 	private static final Key PREF_TEST_FILE_PATTERN_FOLDER = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER);
+	private static final Key PREF_SOURCE_FILE_PATTERN_FOLDER = getPHPUnitKey(PHPUnitPreferenceNames.PREF_SOURCE_FILE_PATTERN_FOLDER);
 	private static final Key PREF_TEST_FILE_PATTERN_FILE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
 	private static final Key PREF_TEST_FILE_SUPER_CLASS = getPHPUnitKey(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
 	private static final Key PREF_GENERATE_CODE_COVERAGE = getPHPUnitKey(PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE);
@@ -62,6 +68,7 @@ public class PHPUnitConfigurationBlock extends
 	protected Text fBootstrap;
 	protected Button fFileButton;
 	protected Text fTestFilePatternFolder;
+	protected Text fSourceFilePatternFolder;
 	protected Text fTestFilePatternFile;
 	protected Text fTestFileSuperClass;
 	protected Button fGenerateCodeCoverageCheckbox;
@@ -77,7 +84,7 @@ public class PHPUnitConfigurationBlock extends
 				PREF_DEBUG_PRINT_OUTPUT, PREF_BOOSTRAP,
 				PREF_TEST_FILE_PATTERN_FOLDER, PREF_TEST_FILE_PATTERN_FILE,
 				PREF_TEST_FILE_SUPER_CLASS, PREF_GENERATE_CODE_COVERAGE,
-				PREF_NO_NAMESPACE_CHECK };
+				PREF_NO_NAMESPACE_CHECK, PREF_SOURCE_FILE_PATTERN_FOLDER };
 	}
 
 	protected Composite createToolContents(Composite parent) {
@@ -140,12 +147,18 @@ public class PHPUnitConfigurationBlock extends
 
 		Label testFilePatternFolderLabel = new Label(testFilePatternGroup,
 				SWT.NULL);
-		testFilePatternFolderLabel.setText("Source Folder Pattern:");
+		testFilePatternFolderLabel.setText("Test Folder Pattern:");
 
 		fTestFilePatternFolder = new Text(testFilePatternGroup, SWT.BORDER
 				| SWT.SINGLE);
 		fTestFilePatternFolder.setLayoutData(new GridData(
 				GridData.FILL_HORIZONTAL));
+		fTestFilePatternFolder.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validateSettings(PREF_TEST_FILE_PATTERN_FOLDER, null,
+						((Text) e.widget).getText());
+			}
+		});
 
 		Button fTestFilePatternFolderDefaultButton = new Button(
 				testFilePatternGroup, SWT.PUSH);
@@ -158,20 +171,40 @@ public class PHPUnitConfigurationBlock extends
 					}
 				});
 
-		Label testFilePatternFolderInfoLabel = new Label(testFilePatternGroup,
-				SWT.NONE);
-		testFilePatternFolderInfoLabel
-				.setText("Use placeholder %p for project and %d[{start,end}] for directory."
+		addInfoLabel(
+				testFilePatternGroup,
+				"The test folder pattern is used for automatic generate the target folder for new test case files",
+				3);
+
+		Label sourceFilePatternFolderLabel = new Label(testFilePatternGroup,
+				SWT.NULL);
+		sourceFilePatternFolderLabel.setText("Source Folder Pattern:");
+
+		fSourceFilePatternFolder = new Text(testFilePatternGroup, SWT.BORDER
+				| SWT.SINGLE);
+		fSourceFilePatternFolder.setLayoutData(new GridData(
+				GridData.FILL_HORIZONTAL));
+		fSourceFilePatternFolder.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				validateSettings(PREF_SOURCE_FILE_PATTERN_FOLDER, null,
+						((Text) e.widget).getText());
+			}
+		});
+
+		addInfoLabel(
+				testFilePatternGroup,
+				"The source folder pattern is used for automatic generate the target folder for new php class files",
+				3);
+
+		addInfoLabel(
+				testFilePatternGroup,
+				"For both folder pattern use placeholder %p for project and %d[{start,end}] for directory."
 						+ "\nExamples for file /library/myframework/subfolder1/subfolder2/filename.php"
 						+ "\n%d = /library/myframework/subfolder1/subfolder2"
 						+ "\n%d{3} = subfolder1"
 						+ "\n%d{2,3} = myframework/subfolder1"
 						+ "\n%d{,3} = library/myframework/subfolder1"
-						+ "\n%d{2,} = myframework/subfolder1/subfolder2");
-		GridData folderInfoData = new GridData(GridData.FILL_HORIZONTAL);
-		folderInfoData.horizontalSpan = 3;
-		testFilePatternFolderInfoLabel.setLayoutData(folderInfoData);
-		makeFontItalic(testFilePatternFolderInfoLabel);
+						+ "\n%d{2,} = myframework/subfolder1/subfolder2", 3);
 
 		Label testFilePatternFileLabel = new Label(testFilePatternGroup,
 				SWT.NULL);
@@ -193,18 +226,13 @@ public class PHPUnitConfigurationBlock extends
 					}
 				});
 
-		Label testFilePatternFileInfoLabel = new Label(testFilePatternGroup,
-				SWT.NONE);
-		testFilePatternFileInfoLabel
-				.setText("Use placeholder %f for short filename or %ff for long filename without extension and %e for file extension."
+		addInfoLabel(
+				testFilePatternGroup,
+				"Use placeholder %f for short filename or %ff for long filename without extension and %e for file extension."
 						+ "\nExamples for part1.part2.part3.php"
 						+ "\n%f = part1"
 						+ "\n%ff = part1.part2.part3"
-						+ "\n%e = php");
-		GridData fileInfoData = new GridData(GridData.FILL_HORIZONTAL);
-		fileInfoData.horizontalSpan = 3;
-		testFilePatternFileInfoLabel.setLayoutData(fileInfoData);
-		makeFontItalic(testFilePatternFileInfoLabel);
+						+ "\n%e = php", 3);
 
 		return testFilePatternGroup;
 	}
@@ -293,7 +321,15 @@ public class PHPUnitConfigurationBlock extends
 
 	protected void validateSettings(Key changedKey, String oldValue,
 			String newValue) {
-		// TODO Auto-generated method stub
+		if (fTestFilePatternFolder.getText().indexOf('{') != -1
+				&& "".equals(fSourceFilePatternFolder.getText())) {
+			String message = "Since you want to use not the whole part for the test folder pattern you have to configure the source folder pattern.";
+			Status status = new Status(IStatus.ERROR, PHPUnitPlugin.PLUGIN_ID,
+					message);
+			getStatusChangeListener().statusChanged(status);
+		} else {
+			getStatusChangeListener().statusChanged(Status.OK_STATUS);
+		}
 	}
 
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
@@ -304,6 +340,8 @@ public class PHPUnitConfigurationBlock extends
 				fTestFilePatternFolder.getText());
 		setValue(PREF_TEST_FILE_PATTERN_FILE, fTestFilePatternFile.getText());
 		setValue(PREF_TEST_FILE_SUPER_CLASS, fTestFileSuperClass.getText());
+		setValue(PREF_SOURCE_FILE_PATTERN_FOLDER,
+				fSourceFilePatternFolder.getText());
 
 		return super.processChanges(container);
 	}
@@ -368,5 +406,10 @@ public class PHPUnitConfigurationBlock extends
 		if (superClass == null || "".equals(superClass))
 			superClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
 		fTestFileSuperClass.setText(superClass);
+
+		folder = getValue(PREF_SOURCE_FILE_PATTERN_FOLDER);
+		if (folder == null)
+			folder = "";
+		fSourceFilePatternFolder.setText(folder);
 	}
 }

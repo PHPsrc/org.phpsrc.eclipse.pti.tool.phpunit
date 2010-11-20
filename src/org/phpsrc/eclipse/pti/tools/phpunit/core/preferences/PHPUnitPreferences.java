@@ -12,25 +12,27 @@ import org.phpsrc.eclipse.pti.library.pear.core.preferences.AbstractPEARPHPToolP
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 
 public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
-	protected String bootstrap;
-	protected String testFilePatternFolder;
-	protected String testFilePatternFile;
-	protected String testFileSuperClass;
-	protected boolean generateCodeCoverage;
-	protected boolean noNamespaceCheck;
+	protected final String bootstrap;
+	protected final String testFilePatternFolder;
+	protected final String sourceFilePatternFolder;
+	protected final String testFilePatternFile;
+	protected final String testFileSuperClass;
+	protected final boolean generateCodeCoverage;
+	protected final boolean noNamespaceCheck;
 
 	public PHPUnitPreferences(String phpExecutable, boolean printOutput,
 			String pearLibraryName, String bootstrap,
-			String testFilePatternFolder, String testFilePatternFile,
-			String testFileSuperClass, boolean generateCodeCoverage,
-			boolean noNamespaceCheck) {
+			String testFilePatternFolder, String sourceFilePatternFolder,
+			String testFilePatternFile, String testFileSuperClass,
+			boolean generateCodeCoverage, boolean noNamespaceCheck) {
 		super(phpExecutable, printOutput, pearLibraryName);
 		this.bootstrap = bootstrap;
 		this.testFilePatternFolder = testFilePatternFolder;
+		this.sourceFilePatternFolder = sourceFilePatternFolder;
 		this.testFilePatternFile = testFilePatternFile;
-		this.testFileSuperClass = testFileSuperClass;
-		if (this.testFileSuperClass == null
-				|| "".equals(this.testFileSuperClass))
+		if (testFileSuperClass == null || "".equals(testFileSuperClass))
+			this.testFileSuperClass = testFileSuperClass;
+		else
 			this.testFileSuperClass = PHPUnit.PHPUNIT_TEST_CASE_CLASS;
 		this.generateCodeCoverage = generateCodeCoverage;
 		this.noNamespaceCheck = noNamespaceCheck;

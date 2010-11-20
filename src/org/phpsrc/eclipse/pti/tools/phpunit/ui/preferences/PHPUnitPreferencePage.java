@@ -7,8 +7,11 @@
  *******************************************************************************/
 
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.php.internal.ui.preferences.IStatusChangeListener;
 import org.eclipse.php.internal.ui.preferences.PropertyAndPreferencePage;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -17,16 +20,18 @@ import org.phpsrc.eclipse.pti.core.launching.PHPToolLauncher;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 
-
+@SuppressWarnings("restriction")
 public class PHPUnitPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID = "org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID = "org.phpsrc.eclipse.pti.tools.phpunit.ui.propertyPages.PreferencePage"; //$NON-NLS-1$
 
 	private PHPUnitConfigurationBlock fConfigurationBlock;
+	private IStatus origStatusOk;
 
 	public PHPUnitPreferencePage() {
 		setPreferenceStore(PHPUnitPlugin.getDefault().getPreferenceStore());
+		origStatusOk = getPreferenceContentStatus();
 	}
 
 	/*
@@ -37,7 +42,8 @@ public class PHPUnitPreferencePage extends PropertyAndPreferencePage {
 
 	public void createControl(Composite parent) {
 		IWorkbenchPreferenceContainer container = (IWorkbenchPreferenceContainer) getContainer();
-		fConfigurationBlock = new PHPUnitConfigurationBlock(getNewStatusChangedListener(), getProject(), container);
+		fConfigurationBlock = new PHPUnitConfigurationBlock(
+				getNewStatusChangedListener(), getProject(), container);
 
 		super.createControl(parent);
 	}
@@ -93,11 +99,13 @@ public class PHPUnitPreferencePage extends PropertyAndPreferencePage {
 	 * enableProjectSpecificSettings(boolean)
 	 */
 
-	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+	protected void enableProjectSpecificSettings(
+			boolean useProjectSpecificSettings) {
 		// Order is important!
 		super.enableProjectSpecificSettings(useProjectSpecificSettings);
 		if (fConfigurationBlock != null) {
-			fConfigurationBlock.useProjectSpecificSettings(useProjectSpecificSettings);
+			fConfigurationBlock
+					.useProjectSpecificSettings(useProjectSpecificSettings);
 		}
 	}
 
@@ -129,7 +137,6 @@ public class PHPUnitPreferencePage extends PropertyAndPreferencePage {
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performApply()
 	 */
-
 	public void performApply() {
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performApply();
@@ -162,4 +169,14 @@ public class PHPUnitPreferencePage extends PropertyAndPreferencePage {
 		setDescription(null); // no description for property page
 	}
 
+	protected IStatusChangeListener getNewStatusChangedListener() {
+		return new IStatusChangeListener() {
+			public void statusChanged(IStatus status) {
+				if (status == null || status.isOK())
+					setPreferenceContentStatus(origStatusOk);
+				else
+					setPreferenceContentStatus(status);
+			}
+		};
+	}
 }
