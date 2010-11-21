@@ -52,6 +52,7 @@ import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
 import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
@@ -496,6 +497,13 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				setMessage("File exists and will be combined",
 						WizardPage.INFORMATION);
 				testFileExists = true;
+			}
+		}
+
+		if (selection != null && selection.size() > 0) {
+			if (PHPUnit.isTestCase((IFile) selection.getFirstElement())) {
+				setMessage("Source file is a already a PHPUnit Test Case",
+						WizardPage.INFORMATION);
 			}
 		}
 
