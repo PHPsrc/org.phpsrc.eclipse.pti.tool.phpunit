@@ -277,17 +277,21 @@ public class PHPClassCreationWizardPage extends WizardPage {
 				className = className.substring(0, className.length() - 4);
 			fTestClassName.setText(className);
 
-			String patternFolder = null;
+			String patternTestFolder = null;
+			String patternSourceFolder = null;
 			String patternFile = null;
 
 			preferences = PHPUnitPreferencesFactory.factory(fClassFile);
 			if (preferences != null) {
-				patternFolder = preferences.getTestFilePatternFolder();
+				patternSourceFolder = preferences.getSourceFilePatternFolder();
+				if ("".equals(patternSourceFolder))
+					patternSourceFolder = null;
 				patternFile = preferences.getTestFilePatternFile();
+				patternTestFolder = preferences.getTestFilePatternFolder();
 			}
 
-			if (patternFolder == null)
-				patternFolder = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FOLDER_DEFAULT;
+			if (patternTestFolder == null)
+				patternTestFolder = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FOLDER_DEFAULT;
 
 			String patternProject = "";
 			String patternPath = "";
@@ -304,30 +308,95 @@ public class PHPClassCreationWizardPage extends WizardPage {
 				patternProject = path;
 			}
 
-			String targetFolder = File.separatorChar + patternProject
-					+ File.separatorChar + patternPath;
+			if (patternSourceFolder != null) {
 
-			if (patternFolder.charAt(patternFolder.length() - 1) == File.separatorChar)
-				patternFolder = patternFolder.substring(0,
-						patternFolder.length() - 1);
+				Pattern pDirPlaceholder = Pattern
+						.compile(Pattern
+								.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR)
+								+ "(\\{([0-9]*)(,)?([0-9]*)\\})?");
 
-			patternFolder = patternFolder.replace(
-					IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
-					"([^" + File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
-			patternFolder = patternFolder
-					.replace(
-							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR,
-							"(.+)"); //$NON-NLS-1$
-			patternFolder = patternFolder.replace("\\", "\\\\"); //$NON-NLS-1$  //$NON-NLS-2$
+				String[] folderParts = patternPath.split(Pattern.quote(""
+						+ File.separatorChar));
 
-			Pattern p = Pattern.compile(patternFolder);
-			Matcher m = p.matcher(targetFolder);
-			if (m.matches()) {
-				targetFolder = File.separatorChar + m.group(1)
-						+ File.separatorChar + m.group(2);
+				Matcher mDirPlaceholder = pDirPlaceholder
+						.matcher(patternSourceFolder);
+				while (mDirPlaceholder.find()) {
+					if (mDirPlaceholder.group(1) != null
+							&& !"".equals(mDirPlaceholder.group(1))) {
+						int start = 1;
+						int end = 0;
+						try {
+							start = Integer.parseInt(mDirPlaceholder.group(2));
+						} catch (Exception e) {
+						}
+						try {
+							end = Integer.parseInt(mDirPlaceholder.group(4));
+						} catch (Exception e) {
+						}
+
+						if (end == 0) {
+							if (",".equals(mDirPlaceholder.group(3))) {
+								end = folderParts.length;
+							} else {
+								end = start;
+							}
+						} else if (end > folderParts.length) {
+							end = folderParts.length;
+						}
+
+						String folderSubstring = "";
+						for (int i = start; i <= end; ++i) {
+							if (i > folderParts.length)
+								break;
+
+							if (folderSubstring.length() > 0) {
+								folderSubstring += File.separatorChar;
+							}
+							folderSubstring += folderParts[i - 1];
+						}
+
+						patternSourceFolder = patternSourceFolder.replace(
+								mDirPlaceholder.group(), folderSubstring);
+					} else {
+						patternSourceFolder = patternSourceFolder
+								.replaceFirst(
+										Pattern.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR),
+										patternPath.replace("\\", "\\\\"));
+					}
+				}
+
+				patternSourceFolder = patternSourceFolder
+						.replace(
+								IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
+								patternProject);
+
+				fContainer.setText(patternSourceFolder);
+			} else {
+				String targetFolder = File.separatorChar + patternProject
+						+ File.separatorChar + patternPath;
+
+				if (patternTestFolder.charAt(patternTestFolder.length() - 1) == File.separatorChar)
+					patternTestFolder = patternTestFolder.substring(0,
+							patternTestFolder.length() - 1);
+
+				patternTestFolder = patternTestFolder
+						.replace(
+								IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_PROJECT,
+								"([^" + File.separatorChar + "]+)"); //$NON-NLS-1$  //$NON-NLS-2$
+				patternTestFolder = patternTestFolder.replace(
+						IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR,
+						"(.+)"); //$NON-NLS-1$
+				patternTestFolder = patternTestFolder.replace("\\", "\\\\"); //$NON-NLS-1$  //$NON-NLS-2$
+
+				Pattern p = Pattern.compile(patternTestFolder);
+				Matcher m = p.matcher(targetFolder);
+				if (m.matches()) {
+					targetFolder = File.separatorChar + m.group(1)
+							+ File.separatorChar + m.group(2);
+				}
+
+				fContainer.setText(targetFolder);
 			}
-
-			fContainer.setText(targetFolder);
 
 			if (patternFile == null)
 				patternFile = PHPUnitConfigurationBlock.TEST_FILE_PATTERN_FILE_DEFAULT;
@@ -347,8 +416,7 @@ public class PHPClassCreationWizardPage extends WizardPage {
 							IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION,
 							"([^.]+)"); //$NON-NLS-1$
 
-			p = Pattern.compile(patternFile);
-			m = p.matcher(fileName);
+			Matcher m = Pattern.compile(patternFile).matcher(fileName);
 			if (m.matches()) {
 				fileName = m.group(1) + "." + m.group(2); //$NON-NLS-1$
 			}
@@ -398,8 +466,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		if (selection != null) {
 			ISourceModule module = PHPToolkitUtil.getSourceModule(selection
 					.getFirstElement());
+
 			if (module != null) {
-				this.setTestCaseClassName(PHPToolkitUtil.getClassName(module));
+				this.setTestCaseClassName(PHPToolkitUtil.getClassName(module),
+						(IResource) selection.getFirstElement());
 			}
 		}
 	}

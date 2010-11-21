@@ -46,6 +46,10 @@ public class PHPUnitPreferences extends AbstractPEARPHPToolPreferences {
 		return testFilePatternFolder;
 	}
 
+	public String getSourceFilePatternFolder() {
+		return sourceFilePatternFolder;
+	}
+
 	public String getTestFilePatternFile() {
 		return testFilePatternFile;
 	}
