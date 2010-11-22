@@ -52,6 +52,7 @@ import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchMatch;
 import org.phpsrc.eclipse.pti.core.search.ui.dialogs.FilteredPHPClassSelectionDialog;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
@@ -289,6 +290,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		String patternPath = "";
 
 		String path = type.getPath().toOSString();
+
 		int firstSeparator = path.indexOf(File.separatorChar, 1);
 		if (firstSeparator > 0) {
 			patternProject = path.substring(1, firstSeparator);
@@ -333,6 +335,9 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 				String folderSubstring = "";
 				for (int i = start; i <= end; ++i) {
+					if (i > folderParts.length)
+						break;
+
 					if (folderSubstring.length() > 0) {
 						folderSubstring += File.separatorChar;
 					}
@@ -345,7 +350,7 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 				patternFolder = patternFolder
 						.replaceFirst(
 								Pattern.quote(IPHPUnitConstants.TEST_FILE_PATTERN_PLACEHOLDER_DIR),
-								patternPath);
+								patternPath.replace("\\", "\\\\"));
 			}
 		}
 
@@ -489,9 +494,17 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 			if (fileName != null
 					&& !fileName.equals("") && containerFolder.getFile(new Path(fileName)).exists()) { //$NON-NLS-1$
-				setMessage("File exists and will be combined",
+				setMessage(
+						"File exists so new test methods will be supplemented",
 						WizardPage.INFORMATION);
 				testFileExists = true;
+			}
+		}
+
+		if (selection != null && selection.size() > 0) {
+			if (PHPUnit.isTestCase((IFile) selection.getFirstElement())) {
+				setMessage("Source file is a already a PHPUnit Test Case",
+						WizardPage.INFORMATION);
 			}
 		}
 
