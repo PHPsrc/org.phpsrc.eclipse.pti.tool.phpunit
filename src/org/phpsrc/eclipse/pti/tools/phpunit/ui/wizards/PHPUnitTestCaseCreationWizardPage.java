@@ -494,7 +494,8 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 
 			if (fileName != null
 					&& !fileName.equals("") && containerFolder.getFile(new Path(fileName)).exists()) { //$NON-NLS-1$
-				setMessage("File exists and will be combined",
+				setMessage(
+						"File exists so new test methods will be supplemented",
 						WizardPage.INFORMATION);
 				testFileExists = true;
 			}
