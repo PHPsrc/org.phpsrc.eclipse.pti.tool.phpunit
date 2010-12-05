@@ -53,7 +53,7 @@ public class TestRunSession implements ITestRunSession {
 	/**
 	 * Test runner client or <code>null</code>.
 	 */
-	private TapTestRunnerClient fTestRunnerClient;
+	private JsonTestRunnerClient fTestRunnerClient;
 
 	private final ListenerList/* <ITestSessionListener> */fSessionListeners;
 
@@ -122,7 +122,7 @@ public class TestRunSession implements ITestRunSession {
 	public TestRunSession(PHPToolLauncher launcher, String testRunName, IFile testFile) {
 		this(testRunName, testFile != null ? testFile.getProject() : null, testFile);
 
-		fTestRunnerClient = new TapTestRunnerClient();
+		fTestRunnerClient = new JsonTestRunnerClient();
 		fTestRunnerClient.startListening(new ITestRunListener[] { new TestSessionNotifier() });
 		addTestSessionListener(new TestRunListenerAdapter(this));
 	}
@@ -130,7 +130,7 @@ public class TestRunSession implements ITestRunSession {
 	public TestRunSession(PHPToolLauncher launcher, String testRunName, IProject project) {
 		this(testRunName, project, null);
 
-		fTestRunnerClient = new TapTestRunnerClient();
+		fTestRunnerClient = new JsonTestRunnerClient();
 		fTestRunnerClient.startListening(new ITestRunListener[] { new TestSessionNotifier() });
 		addTestSessionListener(new TestRunListenerAdapter(this));
 	}

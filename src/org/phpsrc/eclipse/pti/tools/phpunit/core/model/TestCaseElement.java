@@ -30,6 +30,9 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		index = testName.indexOf('@');
 		if (index > 0)
 			return testName.substring(0, index);
+		index = testName.indexOf("::");
+		if (index > 0)
+			return testName.substring(index + 2);
 		return testName;
 	}
 

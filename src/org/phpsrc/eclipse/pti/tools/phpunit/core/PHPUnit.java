@@ -226,14 +226,14 @@ public class PHPUnit extends AbstractPHPTool {
 			PHPUnitPreferences prefs = PHPUnitPreferencesFactory
 					.factory(testFile);
 
-			final File summaryFile = createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
+			// final File summaryFile =
+			// createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
 
 			ISourceModule module = PHPToolkitUtil.getSourceModule(testFile);
 			IType[] types = module.getAllTypes();
 			for (IType type : types) {
-				String cmdLineArgs = "--log-junit "
-						+ OperatingSystem.escapeShellFileArg(summaryFile
-								.toString());
+				String cmdLineArgs = "--log-json php://stdout";
+
 				File coverageFile = null;
 				if (prefs.generateCodeCoverage()) {
 					coverageFile = new File(
@@ -251,10 +251,13 @@ public class PHPUnit extends AbstractPHPTool {
 				PHPToolLauncher launcher = getProjectPHPToolLauncher(
 						testFile.getProject(), cmdLineArgs, testFile
 								.getParent().getLocation());
+
+				TestRunSession session = new TestRunSession(launcher,
+						"TestRunTest", testFile);
+				addTestRunSession(session);
+
 				String output = launcher.launch(testFile.getProject());
 				IProblem[] problems = parseOutput(testFile.getProject(), output);
-
-				importTestRunSession(summaryFile);
 
 				if (coverageFile != null && coverageFile.exists()) {
 					CloverCodeCoverageHandler.importXml(coverageFile);
@@ -265,8 +268,6 @@ public class PHPUnit extends AbstractPHPTool {
 			}
 		} catch (ModelException e) {
 			Logger.logException(e);
-		} catch (IOException e) {
-			Logger.logException(e);
 		}
 
 		return new IProblem[0];
@@ -275,6 +276,18 @@ public class PHPUnit extends AbstractPHPTool {
 	private File createTempSummaryFile(String fileName) throws IOException {
 		File tempDir = createTempDir("pti_phpunit"); //$NON-NLS-1$
 		return createTempFile(tempDir, fileName);
+	}
+
+	private void addTestRunSession(final TestRunSession session) {
+		UIJob job = new UIJob("Update Test Runner") {
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				PHPUnitPlugin.getModel().addTestRunSession(session);
+				notifyResultListener(session);
+
+				return Status.OK_STATUS;
+			}
+		};
+		job.schedule();
 	}
 
 	private void importTestRunSession(final File summaryFile) {
@@ -296,90 +309,64 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	public IProblem[] runAllTestsInFolder(IFolder folder) {
-		try {
-			PHPUnitPreferences prefs = PHPUnitPreferencesFactory
-					.factory(folder);
 
-			String cmdLineArgs = OperatingSystem.escapeShellFileArg(folder
-					.getLocation().toOSString());
+		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(folder);
 
-			File coverageFile = null;
-			if (prefs.generateCodeCoverage()) {
-				coverageFile = new File(
-						PHPUnitPlugin.getCodeCoverageDirectory(),
-						folder.getName() + ".xml");
-				cmdLineArgs = " --coverage-clover "
-						+ OperatingSystem.escapeShellFileArg(coverageFile
-								.toString()) + " " + cmdLineArgs;
-			}
+		String cmdLineArgs = OperatingSystem.escapeShellFileArg(folder
+				.getLocation().toOSString());
 
-			final File summaryFile = createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
-			cmdLineArgs = "--log-junit "
-					+ OperatingSystem
-							.escapeShellFileArg(summaryFile.toString()) + " "
-					+ cmdLineArgs;
-
-			PHPToolLauncher launcher = getProjectPHPToolLauncher(
-					folder.getProject(), cmdLineArgs, folder.getLocation());
-			IProblem[] problems = parseOutput(folder.getProject(),
-					launcher.launch(folder.getProject()));
-
-			importTestRunSession(summaryFile);
-
-			if (coverageFile != null && coverageFile.exists()) {
-				CloverCodeCoverageHandler.importXml(coverageFile);
-				coverageFile.delete();
-			}
-
-			return problems;
-		} catch (IOException e) {
-			Logger.logException(e);
+		File coverageFile = null;
+		if (prefs.generateCodeCoverage()) {
+			coverageFile = new File(PHPUnitPlugin.getCodeCoverageDirectory(),
+					folder.getName() + ".xml");
+			cmdLineArgs = " --coverage-clover "
+					+ OperatingSystem.escapeShellFileArg(coverageFile
+							.toString()) + " " + cmdLineArgs;
 		}
 
-		return new IProblem[0];
+		cmdLineArgs = "--log-json php://stdout " + cmdLineArgs;
+
+		PHPToolLauncher launcher = getProjectPHPToolLauncher(
+				folder.getProject(), cmdLineArgs, folder.getLocation());
+		IProblem[] problems = parseOutput(folder.getProject(),
+				launcher.launch(folder.getProject()));
+
+		if (coverageFile != null && coverageFile.exists()) {
+			CloverCodeCoverageHandler.importXml(coverageFile);
+			coverageFile.delete();
+		}
+
+		return problems;
 	}
 
 	public IProblem[] runTestSuite(IFile file) {
-		try {
-			PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
+		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
 
-			String cmdLineArgs = OperatingSystem.escapeShellFileArg(file
-					.getLocation().toOSString());
+		String cmdLineArgs = OperatingSystem.escapeShellFileArg(file
+				.getLocation().toOSString());
 
-			final File summaryFile = createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
-			cmdLineArgs = "--log-junit "
-					+ OperatingSystem
-							.escapeShellFileArg(summaryFile.toString()) + " "
-					+ cmdLineArgs;
+		cmdLineArgs = "--log-json php://stdout " + cmdLineArgs;
 
-			File coverageFile = null;
-			if (prefs.generateCodeCoverage()) {
-				coverageFile = new File(
-						PHPUnitPlugin.getCodeCoverageDirectory(),
-						file.getName() + ".xml");
-				cmdLineArgs = " --coverage-clover "
-						+ OperatingSystem.escapeShellFileArg(coverageFile
-								.toString()) + " " + cmdLineArgs;
-			}
-
-			PHPToolLauncher launcher = getProjectPHPToolLauncher(
-					file.getProject(), cmdLineArgs, file.getLocation());
-			IProblem[] problems = parseOutput(file.getProject(),
-					launcher.launch(file.getProject()));
-
-			importTestRunSession(summaryFile);
-
-			if (coverageFile != null && coverageFile.exists()) {
-				CloverCodeCoverageHandler.importXml(coverageFile);
-				coverageFile.delete();
-			}
-
-			return problems;
-		} catch (IOException e) {
-			Logger.logException(e);
+		File coverageFile = null;
+		if (prefs.generateCodeCoverage()) {
+			coverageFile = new File(PHPUnitPlugin.getCodeCoverageDirectory(),
+					file.getName() + ".xml");
+			cmdLineArgs = " --coverage-clover "
+					+ OperatingSystem.escapeShellFileArg(coverageFile
+							.toString()) + " " + cmdLineArgs;
 		}
 
-		return new IProblem[0];
+		PHPToolLauncher launcher = getProjectPHPToolLauncher(file.getProject(),
+				cmdLineArgs, file.getLocation());
+		IProblem[] problems = parseOutput(file.getProject(),
+				launcher.launch(file.getProject()));
+
+		if (coverageFile != null && coverageFile.exists()) {
+			CloverCodeCoverageHandler.importXml(coverageFile);
+			coverageFile.delete();
+		}
+
+		return problems;
 	}
 
 	protected IProblem[] parseOutput(IProject project, String output) {

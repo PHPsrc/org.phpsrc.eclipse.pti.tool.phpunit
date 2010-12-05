@@ -99,13 +99,13 @@ import org.eclipse.ui.progress.UIJob;
 import org.phpsrc.eclipse.pti.core.Messages;
 import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.launcher.ITestKind;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.model.ITestElement.Result;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.ITestRunSessionListener;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.ITestSessionListener;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.PHPUnitModel;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestCaseElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestRunSession;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.model.ITestElement.Result;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction;
 import org.phpsrc.eclipse.pti.ui.viewsupport.BasicElementLabels;
 import org.phpsrc.eclipse.pti.ui.viewsupport.ViewHistory;
@@ -204,11 +204,16 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fTestRunningIcon;
 	final Image fTestIgnoredIcon;
 
-	final ImageDescriptor fSuiteIconDescriptor = PHPUnitPlugin.getImageDescriptor("obj16/tsuite.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteOkIconDescriptor = PHPUnitPlugin.getImageDescriptor("obj16/tsuiteok.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteErrorIconDescriptor = PHPUnitPlugin.getImageDescriptor("obj16/tsuiteerror.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteFailIconDescriptor = PHPUnitPlugin.getImageDescriptor("obj16/tsuitefail.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteRunningIconDescriptor = PHPUnitPlugin.getImageDescriptor("obj16/tsuiterun.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteIconDescriptor = PHPUnitPlugin
+			.getImageDescriptor("obj16/tsuite.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteOkIconDescriptor = PHPUnitPlugin
+			.getImageDescriptor("obj16/tsuiteok.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteErrorIconDescriptor = PHPUnitPlugin
+			.getImageDescriptor("obj16/tsuiteerror.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteFailIconDescriptor = PHPUnitPlugin
+			.getImageDescriptor("obj16/tsuitefail.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteRunningIconDescriptor = PHPUnitPlugin
+			.getImageDescriptor("obj16/tsuiterun.gif"); //$NON-NLS-1$
 
 	final Image fSuiteIcon;
 	final Image fSuiteOkIcon;
@@ -338,10 +343,12 @@ public class TestRunnerViewPart extends ViewPart {
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
 			setActiveTestRunSession((TestRunSession) activeEntry);
 
-			List testRunSessions = PHPUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions = PHPUnitPlugin.getModel()
+					.getTestRunSessions();
 			testRunSessions.removeAll(remainingEntries);
 			for (Iterator iter = testRunSessions.iterator(); iter.hasNext();) {
-				PHPUnitPlugin.getModel().removeTestRunSession((TestRunSession) iter.next());
+				PHPUnitPlugin.getModel().removeTestRunSession(
+						(TestRunSession) iter.next());
 			}
 			for (Iterator iter = remainingEntries.iterator(); iter.hasNext();) {
 				TestRunSession remaining = (TestRunSession) iter.next();
@@ -370,22 +377,26 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public String getText(Object element) {
 			TestRunSession session = (TestRunSession) element;
-			String testRunLabel = BasicElementLabels.getPHPElementName(session.getTestRunName());
+			String testRunLabel = BasicElementLabels.getPHPElementName(session
+					.getTestRunName());
 			if (session.getStartTime() == 0) {
 				return testRunLabel;
 			} else {
-				String startTime = DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
-				return Messages.format(PHPUnitMessages.TestRunnerViewPart_testName_startTime, new Object[] {
-						testRunLabel, startTime });
+				String startTime = DateFormat.getDateTimeInstance().format(
+						new Date(session.getStartTime()));
+				return Messages.format(
+						PHPUnitMessages.TestRunnerViewPart_testName_startTime,
+						new Object[] { testRunLabel, startTime });
 			}
 		}
 
 		public void addMenuEntries(MenuManager manager) {
-			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ImportTestRunSessionAction(fParent
-					.getShell()));
+			manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS,
+					new ImportTestRunSessionAction(fParent.getShell()));
 			if (fTestRunSession != null)
-				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS, new ExportTestRunSessionAction(fParent
-						.getShell(), fTestRunSession));
+				manager.appendToGroup(IWorkbenchActionConstants.MB_ADDITIONS,
+						new ExportTestRunSessionAction(fParent.getShell(),
+								fTestRunSession));
 		}
 
 		public String getMaxEntriesMessage() {
@@ -393,13 +404,16 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public int getMaxEntries() {
-			IPreferenceStore store = PHPUnitPlugin.getDefault().getPreferenceStore();
+			IPreferenceStore store = PHPUnitPlugin.getDefault()
+					.getPreferenceStore();
 			return store.getInt(PHPUnitPreferencesConstants.MAX_TEST_RUNS);
 		}
 
 		public void setMaxEntries(int maxEntries) {
-			IPreferenceStore store = PHPUnitPlugin.getDefault().getPreferenceStore();
-			store.setValue(PHPUnitPreferencesConstants.MAX_TEST_RUNS, maxEntries);
+			IPreferenceStore store = PHPUnitPlugin.getDefault()
+					.getPreferenceStore();
+			store.setValue(PHPUnitPreferencesConstants.MAX_TEST_RUNS,
+					maxEntries);
 		}
 	}
 
@@ -407,14 +421,17 @@ public class TestRunnerViewPart extends ViewPart {
 		private final Shell fShell;
 
 		public ImportTestRunSessionAction(Shell shell) {
-			super(PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
+			super(
+					PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
 			fShell = shell;
 		}
 
 		public void run() {
 			FileDialog importDialog = new FileDialog(fShell, SWT.OPEN);
-			importDialog.setText(PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
-			IDialogSettings dialogSettings = PHPUnitPlugin.getDefault().getDialogSettings();
+			importDialog
+					.setText(PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
+			IDialogSettings dialogSettings = PHPUnitPlugin.getDefault()
+					.getDialogSettings();
 			String lastPath = dialogSettings.get(PREF_LAST_PATH);
 			if (lastPath != null) {
 				importDialog.setFilterPath(lastPath);
@@ -431,9 +448,11 @@ public class TestRunnerViewPart extends ViewPart {
 				PHPUnitModel.importTestRunSession(file);
 			} catch (CoreException e) {
 				Logger.logException(e);
-				ErrorDialog.openError(fShell,
-						PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title, e.getStatus()
-								.getMessage(), e.getStatus());
+				ErrorDialog
+						.openError(
+								fShell,
+								PHPUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_error_title,
+								e.getStatus().getMessage(), e.getStatus());
 			}
 		}
 	}
@@ -442,16 +461,20 @@ public class TestRunnerViewPart extends ViewPart {
 		private final TestRunSession fTestRunSession;
 		private final Shell fShell;
 
-		public ExportTestRunSessionAction(Shell shell, TestRunSession testRunSession) {
-			super(PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_name);
+		public ExportTestRunSessionAction(Shell shell,
+				TestRunSession testRunSession) {
+			super(
+					PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_name);
 			fShell = shell;
 			fTestRunSession = testRunSession;
 		}
 
 		public void run() {
 			FileDialog exportDialog = new FileDialog(fShell, SWT.SAVE);
-			exportDialog.setText(PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
-			IDialogSettings dialogSettings = PHPUnitPlugin.getDefault().getDialogSettings();
+			exportDialog
+					.setText(PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
+			IDialogSettings dialogSettings = PHPUnitPlugin.getDefault()
+					.getDialogSettings();
 			String lastPath = dialogSettings.get(PREF_LAST_PATH);
 			if (lastPath != null) {
 				exportDialog.setFilterPath(lastPath);
@@ -469,9 +492,11 @@ public class TestRunnerViewPart extends ViewPart {
 				PHPUnitModel.exportTestRunSession(fTestRunSession, file);
 			} catch (CoreException e) {
 				Logger.logException(e);
-				ErrorDialog.openError(fShell,
-						PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_error_title, e.getStatus()
-								.getMessage(), e.getStatus());
+				ErrorDialog
+						.openError(
+								fShell,
+								PHPUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_error_title,
+								e.getStatus().getMessage(), e.getStatus());
 			}
 		}
 
@@ -491,10 +516,13 @@ public class TestRunnerViewPart extends ViewPart {
 			TestRunSession deactivatedSession = setActiveTestRunSession(testRunSession);
 			if (deactivatedSession != null)
 				deactivatedSession.swapOut();
-			String testRunLabel = BasicElementLabels.getPHPElementName(fTestRunSession.getTestRunName());
+			String testRunLabel = BasicElementLabels
+					.getPHPElementName(fTestRunSession.getTestRunName());
 			String msg;
 			if (testRunSession.getLaunch() != null) {
-				msg = Messages.format(PHPUnitMessages.TestRunnerViewPart_Launching, new Object[] { testRunLabel });
+				msg = Messages.format(
+						PHPUnitMessages.TestRunnerViewPart_Launching,
+						new Object[] { testRunLabel });
 			} else {
 				msg = testRunLabel;
 			}
@@ -503,10 +531,12 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (testRunSession.equals(fTestRunSession)) {
-				List testRunSessions = PHPUnitPlugin.getModel().getTestRunSessions();
+				List testRunSessions = PHPUnitPlugin.getModel()
+						.getTestRunSessions();
 				TestRunSession deactivatedSession;
 				if (!testRunSessions.isEmpty()) {
-					deactivatedSession = setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
+					deactivatedSession = setActiveTestRunSession((TestRunSession) testRunSessions
+							.get(0));
 				} else {
 					deactivatedSession = setActiveTestRunSession(null);
 				}
@@ -531,7 +561,8 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(null);
 
 			String[] keys = { elapsedTimeAsString(elapsedTime) };
-			String msg = Messages.format(PHPUnitMessages.TestRunnerViewPart_message_finish, keys);
+			String msg = Messages.format(
+					PHPUnitMessages.TestRunnerViewPart_message_finish, keys);
 			registerInfoMessage(msg);
 
 			postSyncRunnable(new Runnable() {
@@ -576,14 +607,18 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
 
-			String className = BasicElementLabels.getPHPElementName(testCaseElement.getClassName());
-			String method = BasicElementLabels.getPHPElementName(testCaseElement.getTestMethodName());
-			String status = Messages.format(PHPUnitMessages.TestRunnerViewPart_message_started, new String[] {
-					className, method });
+			String className = BasicElementLabels
+					.getPHPElementName(testCaseElement.getClassName());
+			String method = BasicElementLabels
+					.getPHPElementName(testCaseElement.getTestMethodName());
+			String status = Messages.format(
+					PHPUnitMessages.TestRunnerViewPart_message_started,
+					new String[] { className, method });
 			registerInfoMessage(status);
 		}
 
-		public void testFailed(TestElement testElement, TestElement.Status status, String trace, String expected,
+		public void testFailed(TestElement testElement,
+				TestElement.Status status, String trace, String expected,
 				String actual) {
 			if (isAutoScroll()) {
 				fTestViewer.registerFailedForAutoScroll(testElement);
@@ -609,8 +644,9 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerViewerUpdate(testCaseElement);
 		}
 
-		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace,
-				String expectedResult, String actualResult) {
+		public void testReran(TestCaseElement testCaseElement,
+				TestElement.Status status, String trace, String expectedResult,
+				String actualResult) {
 			fTestViewer.registerViewerUpdate(testCaseElement); // TODO:
 			// autoExpand?
 			postSyncProcessChanges();
@@ -673,7 +709,8 @@ public class TestRunnerViewPart extends ViewPart {
 			setText(PHPUnitMessages.TestRunnerViewPart_clear_history_label);
 
 			boolean enabled = false;
-			List testRunSessions = PHPUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions = PHPUnitPlugin.getModel()
+					.getTestRunSessions();
 			for (Iterator iter = testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession = (TestRunSession) iter.next();
 				if (!testRunSession.isRunning() && !testRunSession.isStarting()) {
@@ -686,12 +723,14 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public void run() {
 			List testRunSessions = getRunningSessions();
-			Object first = testRunSessions.isEmpty() ? null : testRunSessions.get(0);
+			Object first = testRunSessions.isEmpty() ? null : testRunSessions
+					.get(0);
 			fViewHistory.setHistoryEntries(testRunSessions, first);
 		}
 
 		private List getRunningSessions() {
-			List testRunSessions = PHPUnitPlugin.getModel().getTestRunSessions();
+			List testRunSessions = PHPUnitPlugin.getModel()
+					.getTestRunSessions();
 			for (Iterator iter = testRunSessions.iterator(); iter.hasNext();) {
 				TestRunSession testRunSession = (TestRunSession) iter.next();
 				if (!testRunSession.isRunning() && !testRunSession.isStarting()) {
@@ -750,17 +789,24 @@ public class TestRunnerViewPart extends ViewPart {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 				setText(PHPUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
-				setImageDescriptor(PHPUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
+				setImageDescriptor(PHPUnitPlugin
+						.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
 				setText(PHPUnitMessages.TestRunnerViewPart_toggle_vertical_label);
-				setImageDescriptor(PHPUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
+				setImageDescriptor(PHPUnitPlugin
+						.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
 				setText(PHPUnitMessages.TestRunnerViewPart_toggle_automatic_label);
-				setImageDescriptor(PHPUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$
+				setImageDescriptor(PHPUnitPlugin
+						.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$
 			}
 			fActionOrientation = orientation;
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(this,
-					IPHPUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
+			PlatformUI
+					.getWorkbench()
+					.getHelpSystem()
+					.setHelp(
+							this,
+							IPHPUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
 		}
 
 		public int getOrientation() {
@@ -786,9 +832,11 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private class FailuresOnlyFilterAction extends Action {
 		public FailuresOnlyFilterAction() {
-			super(PHPUnitMessages.TestRunnerViewPart_show_failures_only, AS_CHECK_BOX);
+			super(PHPUnitMessages.TestRunnerViewPart_show_failures_only,
+					AS_CHECK_BOX);
 			setToolTipText(PHPUnitMessages.TestRunnerViewPart_show_failures_only);
-			setImageDescriptor(PHPUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
+			setImageDescriptor(PHPUnitPlugin
+					.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 		}
 
 		public void run() {
@@ -799,7 +847,8 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ShowTimeAction extends Action {
 
 		public ShowTimeAction() {
-			super(PHPUnitMessages.TestRunnerViewPart_show_execution_time, IAction.AS_CHECK_BOX);
+			super(PHPUnitMessages.TestRunnerViewPart_show_execution_time,
+					IAction.AS_CHECK_BOX);
 		}
 
 		public void run() {
@@ -810,8 +859,10 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ShowTestHierarchyAction extends Action {
 
 		public ShowTestHierarchyAction() {
-			super(PHPUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
-			setImageDescriptor(PHPUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.gif")); //$NON-NLS-1$
+			super(PHPUnitMessages.TestRunnerViewPart_hierarchical_layout,
+					IAction.AS_CHECK_BOX);
+			setImageDescriptor(PHPUnitPlugin
+					.getImageDescriptor("elcl16/hierarchicalLayout.gif")); //$NON-NLS-1$
 		}
 
 		public void run() {
@@ -822,7 +873,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private class ActivateOnErrorAction extends Action {
 		public ActivateOnErrorAction() {
-			super(PHPUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
+			super(PHPUnitMessages.TestRunnerViewPart_activate_on_failure_only,
+					IAction.AS_CHECK_BOX);
 			//setImageDescriptor(PHPUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 			update();
 		}
@@ -834,8 +886,10 @@ public class TestRunnerViewPart extends ViewPart {
 		public void run() {
 			boolean checked = isChecked();
 			fShowOnErrorOnly = checked;
-			IPreferenceStore store = PHPUnitPlugin.getDefault().getPreferenceStore();
-			store.setValue(PHPUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, checked);
+			IPreferenceStore store = PHPUnitPlugin.getDefault()
+					.getPreferenceStore();
+			store.setValue(PHPUnitPreferencesConstants.SHOW_ON_ERROR_ONLY,
+					checked);
 		}
 	}
 
@@ -884,11 +938,13 @@ public class TestRunnerViewPart extends ViewPart {
 		fMemento = memento;
 		IWorkbenchSiteProgressService progressService = getProgressService();
 		if (progressService != null)
-			progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_PHPUNIT_RUN);
+			progressService
+					.showBusyForFamily(TestRunnerViewPart.FAMILY_PHPUNIT_RUN);
 	}
 
 	private IWorkbenchSiteProgressService getProgressService() {
-		Object siteService = getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		Object siteService = getSite().getAdapter(
+				IWorkbenchSiteProgressService.class);
 		if (siteService != null)
 			return (IWorkbenchSiteProgressService) siteService;
 		return null;
@@ -904,15 +960,18 @@ public class TestRunnerViewPart extends ViewPart {
 
 		// int activePage= fTabFolder.getSelectionIndex();
 		// memento.putInteger(TAG_PAGE, activePage);
-		memento.putString(TAG_SCROLL, fScrollLockAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		memento.putString(TAG_SCROLL,
+				fScrollLockAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		int weigths[] = fSashForm.getWeights();
 		int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
 		memento.putInteger(TAG_ORIENTATION, fOrientation);
 
-		memento.putString(TAG_FAILURES_ONLY, fFailuresOnlyFilterAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		memento.putString(TAG_FAILURES_ONLY,
+				fFailuresOnlyFilterAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 		memento.putInteger(TAG_LAYOUT, fLayout);
-		memento.putString(TAG_SHOW_TIME, fShowTimeAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
+		memento.putString(TAG_SHOW_TIME,
+				fShowTimeAction.isChecked() ? "true" : "false"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void restoreLayoutState(IMemento memento) {
@@ -927,7 +986,8 @@ public class TestRunnerViewPart extends ViewPart {
 		// }
 		Integer ratio = memento.getInteger(TAG_RATIO);
 		if (ratio != null)
-			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
+			fSashForm.setWeights(new int[] { ratio.intValue(),
+					1000 - ratio.intValue() });
 		Integer orientation = memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null)
 			fOrientation = orientation.intValue();
@@ -975,7 +1035,8 @@ public class TestRunnerViewPart extends ViewPart {
 		if (fUpdateJob != null) {
 			return;
 		}
-		fJUnitIsRunningJob = new JUnitIsRunningJob(PHPUnitMessages.TestRunnerViewPart_wrapperJobName);
+		fJUnitIsRunningJob = new JUnitIsRunningJob(
+				PHPUnitMessages.TestRunnerViewPart_wrapperJobName);
 		fJUnitIsRunningLock = Job.getJobManager().newLock();
 		// acquire lock while a test run is running
 		// the lock is released when the test run terminates
@@ -1021,7 +1082,8 @@ public class TestRunnerViewPart extends ViewPart {
 	public void rerunTestRun() {
 		if (lastLaunchIsKeptAlive()) {
 			// prompt for terminating the existing run
-			if (MessageDialog.openQuestion(getSite().getShell(), PHPUnitMessages.TestRunnerViewPart_terminate_title,
+			if (MessageDialog.openQuestion(getSite().getShell(),
+					PHPUnitMessages.TestRunnerViewPart_terminate_title,
 					PHPUnitMessages.TestRunnerViewPart_terminate_message)) {
 				stopTest(); // TODO: wait for termination
 			}
@@ -1063,7 +1125,8 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 			return file.getAbsolutePath();
 		} catch (IOException e) {
-			throw new CoreException(new Status(IStatus.ERROR, PHPUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
+			throw new CoreException(new Status(IStatus.ERROR,
+					PHPUnitPlugin.PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
 		}
 	}
 
@@ -1095,7 +1158,8 @@ public class TestRunnerViewPart extends ViewPart {
 		if (fTestRunSession == null)
 			return 0;
 		else
-			return fTestRunSession.getErrorCount() + fTestRunSession.getFailureCount();
+			return fTestRunSession.getErrorCount()
+					+ fTestRunSession.getFailureCount();
 	}
 
 	private String elapsedTimeAsString(long runTime) {
@@ -1120,7 +1184,8 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void updateViewIcon() {
-		if (fTestRunSession == null || fTestRunSession.isStopped() || fTestRunSession.isRunning()
+		if (fTestRunSession == null || fTestRunSession.isStopped()
+				|| fTestRunSession.isRunning()
 				|| fTestRunSession.getStartedCount() == 0)
 			fViewImage = fOriginalViewImage;
 		else if (hasErrorsOrFailures())
@@ -1133,8 +1198,11 @@ public class TestRunnerViewPart extends ViewPart {
 	private void updateViewTitleProgress() {
 		if (fTestRunSession != null) {
 			if (fTestRunSession.isRunning()) {
-				Image progress = fProgressImages.getImage(fTestRunSession.getStartedCount(), fTestRunSession
-						.getTotalCount(), fTestRunSession.getErrorCount(), fTestRunSession.getFailureCount());
+				Image progress = fProgressImages.getImage(
+						fTestRunSession.getStartedCount(),
+						fTestRunSession.getTotalCount(),
+						fTestRunSession.getErrorCount(),
+						fTestRunSession.getFailureCount());
 				if (progress != fViewImage) {
 					fViewImage = progress;
 					firePropertyChange(IWorkbenchPart.PROP_TITLE);
@@ -1201,9 +1269,11 @@ public class TestRunnerViewPart extends ViewPart {
 
 			clearStatus();
 			fFailureTrace.clear();
-			registerInfoMessage(BasicElementLabels.getPHPElementName(fTestRunSession.getTestRunName()));
+			registerInfoMessage(BasicElementLabels
+					.getPHPElementName(fTestRunSession.getTestRunName()));
 
-			fRerunLastTestAction.setEnabled(fTestRunSession.getTestFile() != null);
+			fRerunLastTestAction
+					.setEnabled(fTestRunSession.getTestFile() != null);
 
 			if (fTestRunSession.isRunning()) {
 				startUpdateJobs();
@@ -1235,10 +1305,12 @@ public class TestRunnerViewPart extends ViewPart {
 	private void setTitleToolTip() {
 		String testKindDisplayStr = getTestKindDisplayName();
 
-		String testRunLabel = BasicElementLabels.getPHPElementName(fTestRunSession.getTestRunName());
+		String testRunLabel = BasicElementLabels
+				.getPHPElementName(fTestRunSession.getTestRunName());
 		if (testKindDisplayStr != null)
-			setTitleToolTip(MessageFormat.format(PHPUnitMessages.TestRunnerViewPart_titleToolTip, new String[] {
-					testRunLabel, testKindDisplayStr }));
+			setTitleToolTip(MessageFormat.format(
+					PHPUnitMessages.TestRunnerViewPart_titleToolTip,
+					new String[] { testRunLabel, testKindDisplayStr }));
 		else
 			setTitleToolTip(testRunLabel);
 	}
@@ -1246,10 +1318,11 @@ public class TestRunnerViewPart extends ViewPart {
 	public synchronized void dispose() {
 		fIsDisposed = true;
 		if (fTestRunSessionListener != null)
-			PHPUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
+			PHPUnitPlugin.getModel().removeTestRunSessionListener(
+					fTestRunSessionListener);
 
-		IHandlerService handlerService = (IHandlerService) getSite().getWorkbenchWindow().getService(
-				IHandlerService.class);
+		IHandlerService handlerService = (IHandlerService) getSite()
+				.getWorkbenchWindow().getService(IHandlerService.class);
 		handlerService.deactivateHandler(fRerunLastActivation);
 		handlerService.deactivateHandler(fRerunFailedFirstActivation);
 		setActiveTestRunSession(null);
@@ -1262,7 +1335,8 @@ public class TestRunnerViewPart extends ViewPart {
 		if (fClipboard != null)
 			fClipboard.dispose();
 		if (fViewMenuListener != null) {
-			getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
+			getViewSite().getActionBars().getMenuManager()
+					.removeMenuListener(fViewMenuListener);
 		}
 		if (fDirtyListener != null) {
 			// JavaCore.removeElementChangedListener(fDirtyListener);
@@ -1339,17 +1413,20 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	public static void showTestResultsView() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page = window.getActivePage();
 			TestRunnerViewPart testRunner = null;
 
 			if (page != null) {
 				try { // show the result view
-					testRunner = (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
+					testRunner = (TestRunnerViewPart) page
+							.findView(TestRunnerViewPart.NAME);
 					if (testRunner == null) {
 						IWorkbenchPart activePart = page.getActivePart();
-						testRunner = (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
+						testRunner = (TestRunnerViewPart) page
+								.showView(TestRunnerViewPart.NAME);
 						// restore focus
 						page.activate(activePart);
 					} else {
@@ -1380,7 +1457,8 @@ public class TestRunnerViewPart extends ViewPart {
 
 		Composite empty = new Composite(top, SWT.NONE);
 		empty.setLayout(new Layout() {
-			protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
+			protected Point computeSize(Composite composite, int wHint,
+					int hHint, boolean flushCache) {
 				return new Point(1, 1); // (0, 0) does not work with
 				// super-intelligent ViewForm
 			}
@@ -1401,7 +1479,8 @@ public class TestRunnerViewPart extends ViewPart {
 		bottom.setTopLeft(label);
 		ToolBar failureToolBar = new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
-		fFailureTrace = new FailureTrace(bottom, fClipboard, this, failureToolBar);
+		fFailureTrace = new FailureTrace(bottom, fClipboard, this,
+				failureToolBar);
 		bottom.setContent(fFailureTrace.getComposite());
 
 		fSashForm.setWeights(new int[] { 50, 50 });
@@ -1432,18 +1511,21 @@ public class TestRunnerViewPart extends ViewPart {
 		configureToolBar();
 
 		fCounterComposite = createProgressCountPanel(parent);
-		fCounterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fCounterComposite.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
 		SashForm sashForm = createSashForm(parent);
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		IActionBars actionBars = getViewSite().getActionBars();
 		fCopyAction = new PHPUnitCopyAction(fFailureTrace, fClipboard);
-		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
+		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(),
+				fCopyAction);
 		initPageSwitcher();
 
 		fOriginalViewImage = getTitleImage();
 		fProgressImages = new ProgressImages();
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IPHPUnitHelpContextIds.RESULTS_VIEW);
+		PlatformUI.getWorkbench().getHelpSystem()
+				.setHelp(parent, IPHPUnitHelpContextIds.RESULTS_VIEW);
 
 		getViewSite().getPage().addPartListener(fPartListener);
 
@@ -1455,12 +1537,14 @@ public class TestRunnerViewPart extends ViewPart {
 		fMemento = null;
 
 		fTestRunSessionListener = new TestRunSessionListener();
-		PHPUnitPlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
+		PHPUnitPlugin.getModel().addTestRunSessionListener(
+				fTestRunSessionListener);
 		List sessions = PHPUnitPlugin.getModel().getTestRunSessions();
 		if (sessions.size() > 0) {
 			Object lastSession = sessions.get(0);
 			if (lastSession instanceof TestRunSession)
-				fTestRunSessionListener.sessionAdded((TestRunSession) lastSession);
+				fTestRunSessionListener
+						.sessionAdded((TestRunSession) lastSession);
 		}
 	}
 
@@ -1483,7 +1567,8 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 
 			public int getCurrentPageIndex() {
-				return fViewHistory.getHistoryEntries().indexOf(fViewHistory.getCurrentEntry());
+				return fViewHistory.getHistoryEntries().indexOf(
+						fViewHistory.getCurrentEntry());
 			}
 		};
 	}
@@ -1521,20 +1606,23 @@ public class TestRunnerViewPart extends ViewPart {
 
 		fNextAction = new ShowNextFailureAction(this);
 		fNextAction.setEnabled(false);
-		actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAction);
+		actionBars.setGlobalActionHandler(ActionFactory.NEXT.getId(),
+				fNextAction);
 
 		fPreviousAction = new ShowPreviousFailureAction(this);
 		fPreviousAction.setEnabled(false);
-		actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAction);
+		actionBars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(),
+				fPreviousAction);
 
 		fStopAction = new StopAction();
 		fStopAction.setEnabled(false);
 
 		fRerunLastTestAction = new RerunLastAction();
-		IHandlerService handlerService = (IHandlerService) getSite().getWorkbenchWindow().getService(
-				IHandlerService.class);
+		IHandlerService handlerService = (IHandlerService) getSite()
+				.getWorkbenchWindow().getService(IHandlerService.class);
 		IHandler handler = new AbstractHandler() {
-			public Object execute(ExecutionEvent event) throws ExecutionException {
+			public Object execute(ExecutionEvent event)
+					throws ExecutionException {
 				fRerunLastTestAction.run();
 				return null;
 			}
@@ -1543,11 +1631,13 @@ public class TestRunnerViewPart extends ViewPart {
 				return fRerunLastTestAction.isEnabled();
 			}
 		};
-		fRerunLastActivation = handlerService.activateHandler(RERUN_LAST_COMMAND, handler);
+		fRerunLastActivation = handlerService.activateHandler(
+				RERUN_LAST_COMMAND, handler);
 
 		fRerunFailedFirstAction = new RerunLastFailedFirstAction();
 		handler = new AbstractHandler() {
-			public Object execute(ExecutionEvent event) throws ExecutionException {
+			public Object execute(ExecutionEvent event)
+					throws ExecutionException {
 				fRerunFailedFirstAction.run();
 				return null;
 			}
@@ -1556,7 +1646,8 @@ public class TestRunnerViewPart extends ViewPart {
 				return fRerunFailedFirstAction.isEnabled();
 			}
 		};
-		fRerunFailedFirstActivation = handlerService.activateHandler(RERUN_FAILED_FIRST_COMMAND, handler);
+		fRerunFailedFirstActivation = handlerService.activateHandler(
+				RERUN_FAILED_FIRST_COMMAND, handler);
 
 		fFailuresOnlyFilterAction = new FailuresOnlyFilterAction();
 
@@ -1585,7 +1676,8 @@ public class TestRunnerViewPart extends ViewPart {
 		viewMenu.add(fShowTimeAction);
 		viewMenu.add(new Separator());
 
-		MenuManager layoutSubMenu = new MenuManager(PHPUnitMessages.TestRunnerViewPart_layout_menu);
+		MenuManager layoutSubMenu = new MenuManager(
+				PHPUnitMessages.TestRunnerViewPart_layout_menu);
 		for (int i = 0; i < fToggleOrientationActions.length; ++i) {
 			layoutSubMenu.add(fToggleOrientationActions[i]);
 		}
@@ -1622,9 +1714,11 @@ public class TestRunnerViewPart extends ViewPart {
 
 		if (activePart instanceof IEditorPart) {
 			IEditorPart activeEditorPart = (IEditorPart) activePart;
-			IEditorActionBarContributor contributor = activeEditorPart.getEditorSite().getActionBarContributor();
+			IEditorActionBarContributor contributor = activeEditorPart
+					.getEditorSite().getActionBarContributor();
 			if (contributor instanceof EditorActionBarContributor)
-				return ((EditorActionBarContributor) contributor).getActionBars().getStatusLineManager();
+				return ((EditorActionBarContributor) contributor)
+						.getActionBars().getStatusLineManager();
 		}
 		// no active part
 		return getViewSite().getActionBars().getStatusLineManager();
@@ -1637,9 +1731,11 @@ public class TestRunnerViewPart extends ViewPart {
 		setCounterColumns(layout);
 
 		fCounterPanel = new CounterPanel(composite);
-		fCounterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fCounterPanel.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
 		fProgressBar = new PHPUnitProgressBar(composite);
-		fProgressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		fProgressBar.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
 		return composite;
 	}
 
@@ -1711,7 +1807,8 @@ public class TestRunnerViewPart extends ViewPart {
 		return fCounterPanel != null;
 	}
 
-	public void rerunTest(String testId, String className, String testName, String launchMode) {
+	public void rerunTest(String testId, String className, String testName,
+			String launchMode) {
 		// try {
 		// boolean couldLaunch = fTestRunSession.rerunTest(testId, className,
 		// testName, launchMode);
@@ -1759,7 +1856,9 @@ public class TestRunnerViewPart extends ViewPart {
 		boolean horizontal = orientation == VIEW_ORIENTATION_HORIZONTAL;
 		fSashForm.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
 		for (int i = 0; i < fToggleOrientationActions.length; ++i)
-			fToggleOrientationActions[i].setChecked(fOrientation == fToggleOrientationActions[i].getOrientation());
+			fToggleOrientationActions[i]
+					.setChecked(fOrientation == fToggleOrientationActions[i]
+							.getOrientation());
 		fCurrentOrientation = orientation;
 		GridLayout layout = (GridLayout) fCounterComposite.getLayout();
 		setCounterColumns(layout);
@@ -1774,7 +1873,8 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private static boolean getShowOnErrorOnly() {
-		IPreferenceStore store = PHPUnitPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore store = PHPUnitPlugin.getDefault()
+				.getPreferenceStore();
 		return store.getBoolean(PHPUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
 	}
 

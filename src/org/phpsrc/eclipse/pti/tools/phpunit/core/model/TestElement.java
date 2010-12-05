@@ -17,13 +17,18 @@ import org.eclipse.core.runtime.Assert;
 
 public abstract class TestElement implements ITestElement {
 	public final static class Status {
-		public static final Status RUNNING_ERROR = new Status("RUNNING_ERROR", 5); //$NON-NLS-1$
-		public static final Status RUNNING_FAILURE = new Status("RUNNING_FAILURE", 6); //$NON-NLS-1$
+		public static final Status RUNNING_ERROR = new Status(
+				"RUNNING_ERROR", 5); //$NON-NLS-1$
+		public static final Status RUNNING_FAILURE = new Status(
+				"RUNNING_FAILURE", 6); //$NON-NLS-1$
 		public static final Status RUNNING = new Status("RUNNING", 3); //$NON-NLS-1$
 
-		public static final Status ERROR = new Status("ERROR", /* 1 */ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
-		public static final Status FAILURE = new Status("FAILURE", /* 2 */ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
-		public static final Status OK = new Status("OK", /* 0 */ITestRunListener.STATUS_OK); //$NON-NLS-1$
+		public static final Status ERROR = new Status(
+				"ERROR", /* 1 */ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
+		public static final Status FAILURE = new Status(
+				"FAILURE", /* 2 */ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
+		public static final Status OK = new Status(
+				"OK", /* 0 */ITestRunListener.STATUS_OK); //$NON-NLS-1$
 		public static final Status NOT_RUN = new Status("NOT_RUN", 4); //$NON-NLS-1$
 
 		private static final Status[] OLD_CODE = { OK, ERROR, FAILURE };
@@ -69,7 +74,8 @@ public abstract class TestElement implements ITestElement {
 		}
 
 		public boolean isRunning() {
-			return this == RUNNING || this == RUNNING_FAILURE || this == RUNNING_ERROR;
+			return this == RUNNING || this == RUNNING_FAILURE
+					|| this == RUNNING_ERROR;
 		}
 
 		public boolean isDone() {
@@ -103,7 +109,8 @@ public abstract class TestElement implements ITestElement {
 				return OK;
 		}
 
-		private static Status combineProgressAndErrorStatus(Status progress, Status error) {
+		private static Status combineProgressAndErrorStatus(Status progress,
+				Status error) {
 			if (progress.isDone()) {
 				if (error.isError())
 					return ERROR;
@@ -269,7 +276,8 @@ public abstract class TestElement implements ITestElement {
 			parent.childChangedStatus(this, status);
 	}
 
-	public void setStatus(Status status, String trace, String expected, String actual) {
+	public void setStatus(Status status, String trace, String expected,
+			String actual) {
 		if (trace != null && fTrace != null) {
 			// don't overwrite first trace if same test run logs multiple errors
 			fTrace = fTrace + trace;
@@ -313,6 +321,9 @@ public abstract class TestElement implements ITestElement {
 	private static String extractClassName(String testNameString) {
 		testNameString = extractRawClassName(testNameString);
 		testNameString = testNameString.replace('$', '.'); // see bug 178503
+		int index = testNameString.indexOf("::");
+		if (index > 0)
+			return testNameString.substring(0, index);
 		return testNameString;
 	}
 
@@ -321,7 +332,8 @@ public abstract class TestElement implements ITestElement {
 		if (index < 0)
 			return testNameString;
 		testNameString = testNameString.substring(index + 1);
-		testNameString = testNameString.substring(0, testNameString.indexOf(')'));
+		testNameString = testNameString.substring(0,
+				testNameString.indexOf(')'));
 		return testNameString;
 	}
 

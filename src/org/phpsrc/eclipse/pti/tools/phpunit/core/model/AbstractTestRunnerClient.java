@@ -38,11 +38,13 @@ public class AbstractTestRunnerClient {
 	 */
 	public synchronized void startListening(ITestRunListener[] listeners) {
 		fListeners = listeners;
-		PHPUnitDebugEventHandler.getDefault().addListener(fDebugProcessListener);
+		PHPUnitDebugEventHandler.getDefault()
+				.addListener(fDebugProcessListener);
 	}
 
 	protected synchronized void stopListening() {
-		PHPUnitDebugEventHandler.getDefault().removeListener(fDebugProcessListener);
+		PHPUnitDebugEventHandler.getDefault().removeListener(
+				fDebugProcessListener);
 		fListeners = null;
 	}
 
@@ -77,7 +79,8 @@ public class AbstractTestRunnerClient {
 					listener.testStarted("Uknown", "Uknown");
 					// public void testFailed(int status, String testId, String
 					// testName, String trace, String expected, String actual);
-					listener.testFailed(ITestRunListener.STATUS_FAILURE, "Uknown", "Uknown", null, null, null);
+					listener.testFailed(ITestRunListener.STATUS_FAILURE,
+							"Uknown", "Uknown", null, null, null);
 				}
 				break;
 
