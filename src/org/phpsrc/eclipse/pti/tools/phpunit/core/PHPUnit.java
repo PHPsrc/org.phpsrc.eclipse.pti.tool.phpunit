@@ -328,6 +328,11 @@ public class PHPUnit extends AbstractPHPTool {
 
 		PHPToolLauncher launcher = getProjectPHPToolLauncher(
 				folder.getProject(), cmdLineArgs, folder.getLocation());
+
+		TestRunSession session = new TestRunSession(launcher, "TestRunTest",
+				folder.getProject());
+		addTestRunSession(session);
+
 		IProblem[] problems = parseOutput(folder.getProject(),
 				launcher.launch(folder.getProject()));
 
@@ -358,6 +363,11 @@ public class PHPUnit extends AbstractPHPTool {
 
 		PHPToolLauncher launcher = getProjectPHPToolLauncher(file.getProject(),
 				cmdLineArgs, file.getLocation());
+
+		TestRunSession session = new TestRunSession(launcher, "TestRunTest",
+				file);
+		addTestRunSession(session);
+
 		IProblem[] problems = parseOutput(file.getProject(),
 				launcher.launch(file.getProject()));
 
