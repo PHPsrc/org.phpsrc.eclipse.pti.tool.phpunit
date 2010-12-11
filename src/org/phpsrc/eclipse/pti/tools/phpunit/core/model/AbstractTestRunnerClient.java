@@ -1,5 +1,7 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.core.model;
 
+import java.util.Date;
+
 public class AbstractTestRunnerClient {
 
 	/**
@@ -8,17 +10,20 @@ public class AbstractTestRunnerClient {
 	protected ITestRunListener[] fListeners;
 
 	private boolean fIsRunning = false;
+	private long fStartTime = -1;
 
 	private ITestDebugProcessListener fDebugProcessListener = new ITestDebugProcessListener() {
 
 		public void startProcess() {
 			fIsRunning = true;
+			fStartTime = new Date().getTime();
 			notifyTestRunStarted();
 		}
 
 		public void stopProcess() {
 			fIsRunning = false;
-			notifyTestRunEnded();
+			notifyTestRunEnded(new Date().getTime() - fStartTime);
+			fStartTime = -1;
 			stopListening();
 		}
 
@@ -56,10 +61,10 @@ public class AbstractTestRunnerClient {
 		}
 	}
 
-	protected void notifyTestRunEnded() {
+	protected void notifyTestRunEnded(long elapsedTime) {
 		if (fListeners != null) {
 			for (ITestRunListener listener : fListeners) {
-				listener.testRunEnded(0);
+				listener.testRunEnded(elapsedTime);
 			}
 		}
 	}

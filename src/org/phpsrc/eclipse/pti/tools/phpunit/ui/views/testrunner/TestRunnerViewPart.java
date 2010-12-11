@@ -117,7 +117,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 	public static final String NAME = "org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner"; //$NON-NLS-1$
 
-	private static final String RERUN_LAST_COMMAND = "org.eclipse.pti.tools.phpunit.phpunitShortcut.rerunLast"; //$NON-NLS-1$
+	private static final String RERUN_LAST_COMMAND = "org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.rerunLast"; //$NON-NLS-1$
 	private static final String RERUN_FAILED_FIRST_COMMAND = "org.eclipse.pti.tools.phpunit.phpunitShortcut.rerunFailedFirst"; //$NON-NLS-1$
 
 	static final int REFRESH_INTERVAL = 200;

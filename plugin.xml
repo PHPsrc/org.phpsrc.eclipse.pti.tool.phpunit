@@ -116,13 +116,18 @@
 		</category>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Run PHPUnit Test">
 		</command>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Toggle Test Case / Test Element">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.rerunLast"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Rerun last test">
 		</command>
 	</extension>
 

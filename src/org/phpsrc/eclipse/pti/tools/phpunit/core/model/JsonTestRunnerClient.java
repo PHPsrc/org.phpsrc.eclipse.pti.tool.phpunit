@@ -136,7 +136,7 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 		listener.testStarted(key, key);
 	}
 
-	protected void notifyTestRunEnded() {
+	protected void notifyTestRunEnded(long elapsedTime) {
 		if (testStarted) {
 			StringBuilder error = new StringBuilder();
 			Matcher m = errorPattern.matcher(outputCache.toString());
@@ -152,6 +152,6 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 			}
 		}
 
-		super.notifyTestRunEnded();
+		super.notifyTestRunEnded(elapsedTime);
 	}
 }
