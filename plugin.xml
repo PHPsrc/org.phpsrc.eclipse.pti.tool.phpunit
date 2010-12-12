@@ -129,6 +129,11 @@
 			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Rerun last test">
 		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.syncclasses"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Synchronise Test Case / Test Element">
+		</command>
 	</extension>
 
 	<extension
@@ -139,13 +144,13 @@
 			label="PHPUnit"
 			visible="false">
 			<action
-				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
-				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-				label="Run PHPUnit Test"
-				icon="icons/full/obj16/testrun.gif"
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.syncclasses"
+				label="Synchronise Test Case / Test Element"
+				icon="icons/full/obj16/synctestcase.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
-				tooltip="Run PHPUnit Test"
-				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
+				tooltip="Synchronise new (test) methods from test case to test element or vice versa"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
 				enablesFor="*">
 			</action>
 			<action
@@ -154,8 +159,18 @@
 				label="Toggle Test Case / Test Element"
 				icon="icons/full/obj16/toggletestcasetestelement.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
-				tooltip="Toggle Test Case / Test Element"
+				tooltip="Toogle between the test case editor and test element editor"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
+				enablesFor="*">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
+				label="Run PHPUnit Test"
+				icon="icons/full/obj16/testrun.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Run selected PHPUnit Test"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
 				enablesFor="*">
 			</action>
 		</actionSet>
