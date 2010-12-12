@@ -150,8 +150,8 @@
 				icon="icons/full/obj16/synctestcase.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Synchronise new (test) methods from test case to test element or vice versa"
-				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
-				enablesFor="*">
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
+				enablesFor="1">
 			</action>
 			<action
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
@@ -161,7 +161,7 @@
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Toogle between the test case editor and test element editor"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
-				enablesFor="*">
+				enablesFor="1">
 			</action>
 			<action
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
@@ -171,7 +171,7 @@
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Run selected PHPUnit Test"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
-				enablesFor="*">
+				enablesFor="+">
 			</action>
 		</actionSet>
 	</extension>

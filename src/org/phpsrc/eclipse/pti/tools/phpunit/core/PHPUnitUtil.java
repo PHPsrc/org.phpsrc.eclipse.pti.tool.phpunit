@@ -4,9 +4,13 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.internal.core.SourceType;
+import org.phpsrc.eclipse.pti.core.PHPToolkitUtil;
+import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
@@ -14,6 +18,21 @@ import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationB
 
 @SuppressWarnings("restriction")
 public class PHPUnitUtil {
+	public static File generateProjectRelativeTestCaseFile(IFile classFile) {
+		SearchMatch[] matches = PHPSearchEngine.findClass(
+				PHPToolkitUtil.getClassName(classFile),
+				PHPSearchEngine.createProjectScope(classFile.getProject()));
+		if (matches.length > 0) {
+			for (SearchMatch match : matches) {
+				if (classFile == null || match.getResource().equals(classFile)) {
+					return generateProjectRelativeTestCaseFile(
+							(SourceType) match.getElement(), classFile);
+				}
+			}
+		}
+		return null;
+	}
+
 	public static File generateProjectRelativeTestCaseFile(SourceType type,
 			IResource resource) {
 		Assert.isNotNull(type);
@@ -121,6 +140,21 @@ public class PHPUnitUtil {
 				fileName.substring(lastDotPos + 1));
 
 		return new File(patternFolder + File.separatorChar + patternFile);
+	}
+
+	public static File generateProjectRelativePHPClassFile(IFile classFile) {
+		SearchMatch[] matches = PHPSearchEngine.findClass(
+				PHPToolkitUtil.getClassName(classFile),
+				PHPSearchEngine.createProjectScope(classFile.getProject()));
+		if (matches.length > 0) {
+			for (SearchMatch match : matches) {
+				if (classFile == null || match.getResource().equals(classFile)) {
+					return generateProjectRelativePHPClassFile(
+							(SourceType) match.getElement(), classFile);
+				}
+			}
+		}
+		return null;
 	}
 
 	public static File generateProjectRelativePHPClassFile(SourceType type,
