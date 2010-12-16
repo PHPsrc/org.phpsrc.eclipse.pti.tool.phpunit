@@ -1,23 +1,47 @@
 package org.phpsrc.eclipse.pti.tools.phpunit.core;
 
 import java.io.File;
+import java.io.InvalidClassException;
+import java.io.InvalidObjectException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.internal.core.SourceType;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.php.internal.ui.PHPUiConstants;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.part.FileEditorInput;
+import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
 import org.phpsrc.eclipse.pti.core.PHPToolkitUtil;
 import org.phpsrc.eclipse.pti.core.search.PHPSearchEngine;
 import org.phpsrc.eclipse.pti.tools.phpunit.IPHPUnitConstants;
+import org.phpsrc.eclipse.pti.tools.phpunit.PHPUnitPlugin;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferences;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.preferences.PHPUnitPreferencesFactory;
 import org.phpsrc.eclipse.pti.tools.phpunit.ui.preferences.PHPUnitConfigurationBlock;
+import org.phpsrc.eclipse.pti.ui.Logger;
 
 @SuppressWarnings("restriction")
 public class PHPUnitUtil {
+	public static String generateTestCaseClassName(String sourceClass) {
+		return sourceClass + "Test";
+	}
+
+	public static String generatePHPClassName(String testClass) {
+		if (testClass.endsWith("Test"))
+			testClass = testClass.substring(0, testClass.length() - 4);
+		return testClass;
+	}
+
 	public static File generateProjectRelativeTestCaseFile(IFile classFile) {
 		SearchMatch[] matches = PHPSearchEngine.findClass(
 				PHPToolkitUtil.getClassName(classFile),
@@ -140,6 +164,48 @@ public class PHPUnitUtil {
 				fileName.substring(lastDotPos + 1));
 
 		return new File(patternFolder + File.separatorChar + patternFile);
+	}
+
+	public static boolean syncPHPClassToTestCase(String sourceClassName,
+			IFile sourceClassFile, String testClassName, String testClassFile,
+			String testSuperClass) {
+		try {
+			PHPUnit phpunit = PHPUnit.getInstance();
+			phpunit.createTestSkeleton(sourceClassName, sourceClassFile,
+					testClassName, testClassFile, testSuperClass);
+
+			Path path = new Path(testClassFile);
+			IFile testFile = ResourcesPlugin.getWorkspace().getRoot()
+					.getFile(path);
+			IEditorInput editorInput = new FileEditorInput(testFile);
+			IWorkbenchWindow window = PHPUnitPlugin.getActiveWorkbenchWindow();
+			IWorkbenchPage page = window.getActivePage();
+			page.openEditor(editorInput, PHPUiConstants.PHP_EDITOR_ID);
+
+			return true;
+		} catch (PHPUnitException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHPUnit Test Case", e.getMessage());
+			Logger.logException(e);
+		} catch (InvalidObjectException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHPUnit Test Case", e.getMessage());
+			Logger.logException(e);
+		} catch (InvalidClassException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHPUnit Test Case", e.getMessage());
+			Logger.logException(e);
+		} catch (CoreException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHPUnit Test Case", e.getMessage());
+			Logger.logException(e);
+		}
+
+		return false;
 	}
 
 	public static File generateProjectRelativePHPClassFile(IFile classFile) {
@@ -305,5 +371,47 @@ public class PHPUnitUtil {
 		}
 
 		return new File(filePath + File.separatorChar + fileName);
+	}
+
+	public static boolean syncTestCaseToPHPClass(String testClassName,
+			IFile testClassFile, String phpClassName, String phpClassFile,
+			String phpSuperClass) {
+		try {
+			PHPUnit phpunit = PHPUnit.getInstance();
+			phpunit.createPHPClassSkeleton(testClassName, testClassFile,
+					phpClassName, phpClassFile, phpSuperClass);
+
+			Path path = new Path(phpClassFile);
+			IFile testFile = ResourcesPlugin.getWorkspace().getRoot()
+					.getFile(path);
+			IEditorInput editorInput = new FileEditorInput(testFile);
+			IWorkbenchWindow window = PHPUnitPlugin.getActiveWorkbenchWindow();
+			IWorkbenchPage page = window.getActivePage();
+			page.openEditor(editorInput, PHPUiConstants.PHP_EDITOR_ID);
+
+			return true;
+		} catch (PHPUnitException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHP Class", e.getMessage());
+			Logger.logException(e);
+		} catch (InvalidObjectException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHP Class", e.getMessage());
+			Logger.logException(e);
+		} catch (InvalidClassException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHP Class", e.getMessage());
+			Logger.logException(e);
+		} catch (CoreException e) {
+			MessageDialog.openError(
+					PHPToolCorePlugin.getActiveWorkbenchShell(),
+					"Failed creating PHP Class", e.getMessage());
+			Logger.logException(e);
+		}
+
+		return false;
 	}
 }

@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.dltk.core.ISourceModule;
+import org.eclipse.dltk.core.ModelException;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
 import org.eclipse.dltk.core.search.SearchMatch;
 import org.eclipse.dltk.internal.core.SourceType;
@@ -272,7 +273,8 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 		fClassName.setText(className);
 		fClassPath.setText(resource.getFullPath().toOSString());
 		fClassFile = (IFile) resource;
-		fTestClassName.setText(className + "Test");
+		fTestClassName
+				.setText(PHPUnitUtil.generateTestCaseClassName(className));
 
 		fContainer.setText(testCaseFile.getParent());
 		fFile.setText(testCaseFile.getName());
@@ -320,7 +322,13 @@ public class PHPUnitTestCaseCreationWizardPage extends WizardPage {
 			ISourceModule module = PHPToolkitUtil.getSourceModule(selection
 					.getFirstElement());
 			if (module != null) {
-				this.setSourceClassName(PHPToolkitUtil.getClassName(module));
+				try {
+					this.setSourceClassName(
+							PHPToolkitUtil.getClassNameWithNamespace(module),
+							module.getCorrespondingResource());
+				} catch (ModelException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 

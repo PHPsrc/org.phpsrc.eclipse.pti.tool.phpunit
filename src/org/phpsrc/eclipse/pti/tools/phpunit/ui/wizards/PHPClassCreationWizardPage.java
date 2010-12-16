@@ -60,7 +60,7 @@ public class PHPClassCreationWizardPage extends WizardPage {
 	protected Text fClassPath;
 	protected Text fClassName;
 	protected IFile fClassFile;
-	protected Text fTestClassName;
+	protected Text fPhpClassName;
 	protected Text fContainer;
 	protected Text fFile;
 	protected Text fSuperClass;
@@ -159,10 +159,10 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		Label testClassNameLabel = new Label(fileGroup, SWT.NULL);
 		testClassNameLabel.setText("Class Name:");
 
-		fTestClassName = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
+		fPhpClassName = new Text(fileGroup, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 2;
-		fTestClassName.setLayoutData(gd);
+		fPhpClassName.setLayoutData(gd);
 
 		// ### SuperClass ###
 
@@ -269,10 +269,7 @@ public class PHPClassCreationWizardPage extends WizardPage {
 			fClassName.setText(className);
 			fClassPath.setText(resource.getFullPath().toOSString());
 			fClassFile = (IFile) resource;
-
-			if (className.endsWith("Test"))
-				className = className.substring(0, className.length() - 4);
-			fTestClassName.setText(className);
+			fPhpClassName.setText(PHPUnitUtil.generatePHPClassName(className));
 
 			File phpClassFile = PHPUnitUtil
 					.generateProjectRelativePHPClassFile(type, resource);
@@ -538,8 +535,8 @@ public class PHPClassCreationWizardPage extends WizardPage {
 		return fSuperClass.getText();
 	}
 
-	public String getTestClassName() {
-		return fTestClassName.getText();
+	public String getPHPClassName() {
+		return fPhpClassName.getText();
 	}
 
 	public IProject getProject() {
