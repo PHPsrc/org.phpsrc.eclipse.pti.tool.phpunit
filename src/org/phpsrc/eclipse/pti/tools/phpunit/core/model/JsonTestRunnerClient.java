@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.phpsrc.eclipse.pti.ui.Logger;
 
 public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 	private static final String STATUS_PASS = "pass"; //$NON-NLS-1$
@@ -37,6 +38,7 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 	private Pattern failedAssertingPattern = Pattern.compile(
 			"Failed asserting that (.*) is equal to (.*)\\.", Pattern.MULTILINE
 					| Pattern.DOTALL);
+	private int jsonObjectLevel = 0;
 
 	/**
 	 * Start listening to a test run. Start a server connection that the
@@ -55,14 +57,20 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 	protected void parseOutput(String text) {
 		for (char c : text.toCharArray()) {
 			if (c == '{') {
-				jsonOutputCache = new StringBuilder();
+				if (jsonObjectLevel == 0) {
+					jsonOutputCache = new StringBuilder();
+				}
+				++jsonObjectLevel;
 			}
 
 			if (jsonOutputCache != null) {
 				jsonOutputCache.append(c);
 				if (c == '}') {
-					parseJson(jsonOutputCache.toString());
-					jsonOutputCache = null;
+					--jsonObjectLevel;
+					if (jsonObjectLevel == 0) {
+						parseJson(jsonOutputCache.toString());
+						jsonOutputCache = null;
+					}
 				}
 			} else {
 				outputCache.append(c);
@@ -72,62 +80,63 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 
 	private void parseJson(String json) {
 		try {
-			// System.out.println(json);
-
 			JSONObject jsonObj = new JSONObject(json);
+			if (jsonObj.has(KEY_EVENT)) {
 
-			String event = jsonObj.getString(KEY_EVENT);
-			if (EVENT_SUITESTART.equals(event)) {
-				for (ITestRunListener listener : fListeners) {
-					if (!testRunStarted) {
-						listener.testRunStarted(jsonObj.getInt(KEY_TESTS));
-						testRunStarted = true;
-					}
-
-					listener.testTreeEntry(jsonObj.getString(KEY_SUITE) + ","
-							+ jsonObj.getString(KEY_SUITE) + ",true,"
-							+ jsonObj.getInt(KEY_TESTS));
-				}
-			} else if (EVENT_TESTSTART.equals(event)) {
-				for (ITestRunListener listener : fListeners) {
-					startTest(listener, jsonObj.getString(KEY_TEST));
-					testStarted = true;
-					lastTestKey = jsonObj.getString(KEY_TEST);
-				}
-			} else if (EVENT_TEST.equals(event)) {
-				for (ITestRunListener listener : fListeners) {
-					if (!testStarted)
-						startTest(listener, jsonObj.getString(KEY_TEST));
-					else
-						testStarted = false;
-
-					String status = jsonObj.getString(KEY_STATUS);
-					if (STATUS_PASS.equals(status)) {
-						listener.testEnded(jsonObj.getString(KEY_TEST),
-								jsonObj.getString(KEY_TEST));
-					} else {
-						int statusCode = STATUS_FAIL.equals(status) ? ITestRunListener.STATUS_FAILURE
-								: ITestRunListener.STATUS_ERROR;
-
-						String expected = "";
-						String actual = "";
-
-						String msg = jsonObj.getString(KEY_MESSAGE).trim();
-						Matcher m = failedAssertingPattern.matcher(msg);
-						if (m.matches()) {
-							expected = m.group(2);
-							actual = m.group(1);
+				String event = jsonObj.getString(KEY_EVENT);
+				if (EVENT_SUITESTART.equals(event)) {
+					for (ITestRunListener listener : fListeners) {
+						if (!testRunStarted) {
+							listener.testRunStarted(jsonObj.getInt(KEY_TESTS));
+							testRunStarted = true;
 						}
 
-						listener.testFailed(statusCode,
-								jsonObj.getString(KEY_TEST),
-								jsonObj.getString(KEY_TEST), msg, expected,
-								actual);
+						listener.testTreeEntry(jsonObj.getString(KEY_SUITE)
+								+ "," + jsonObj.getString(KEY_SUITE) + ",true,"
+								+ jsonObj.getInt(KEY_TESTS));
+					}
+				} else if (EVENT_TESTSTART.equals(event)) {
+					for (ITestRunListener listener : fListeners) {
+						startTest(listener, jsonObj.getString(KEY_TEST));
+						testStarted = true;
+						lastTestKey = jsonObj.getString(KEY_TEST);
+					}
+				} else if (EVENT_TEST.equals(event)) {
+					for (ITestRunListener listener : fListeners) {
+						if (!testStarted)
+							startTest(listener, jsonObj.getString(KEY_TEST));
+						else
+							testStarted = false;
+
+						String status = jsonObj.getString(KEY_STATUS);
+						if (STATUS_PASS.equals(status)) {
+							listener.testEnded(jsonObj.getString(KEY_TEST),
+									jsonObj.getString(KEY_TEST));
+						} else {
+							int statusCode = STATUS_FAIL.equals(status) ? ITestRunListener.STATUS_FAILURE
+									: ITestRunListener.STATUS_ERROR;
+
+							String expected = "";
+							String actual = "";
+
+							String msg = jsonObj.getString(KEY_MESSAGE).trim();
+							Matcher m = failedAssertingPattern.matcher(msg);
+							if (m.matches()) {
+								expected = m.group(2);
+								actual = m.group(1);
+							}
+
+							listener.testFailed(statusCode,
+									jsonObj.getString(KEY_TEST),
+									jsonObj.getString(KEY_TEST), msg, expected,
+									actual);
+						}
 					}
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
+			Logger.logException(e);
 		}
 	}
 
