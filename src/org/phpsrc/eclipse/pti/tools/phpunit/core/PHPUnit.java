@@ -243,7 +243,9 @@ public class PHPUnit extends AbstractPHPTool {
 							+ OperatingSystem.escapeShellFileArg(coverageFile
 									.toString());
 				}
-				cmdLineArgs += " " + type.getElementName();
+				cmdLineArgs += " "
+						+ PHPToolkitUtil.getClassNameWithNamespace(type
+								.getSourceModule());
 				cmdLineArgs += " "
 						+ OperatingSystem.escapeShellFileArg(testFile
 								.getLocation().toOSString());
