@@ -598,10 +598,7 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	static public boolean isTestCase(IFile file) {
-		boolean is = PHPToolkitUtil.hasSuperClass(file,
-				PHPUNIT_TESTCASE_PATTERN);
-		System.out.println(file + ": " + is);
-		return is;
+		return PHPToolkitUtil.hasSuperClass(file, PHPUNIT_TESTCASE_PATTERN);
 	}
 
 	static public boolean isTestSuite(IFile file) {
