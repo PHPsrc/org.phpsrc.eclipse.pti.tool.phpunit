@@ -75,6 +75,9 @@ public class PHPUnit extends AbstractPHPTool {
 	private final static String PHPUNIT_SKELETON_OPTION_TEST = "skeleton-test"; //$NON-NLS-1$
 	private final static String PHPUNIT_SUMMARY_FILE = "phpunit.xml"; //$NON-NLS-1$
 
+	private final static Pattern PHPUNIT_TESTCASE_PATTERN = Pattern
+			.compile("PHPUnit_.+_TestCase");
+
 	private static PHPUnit instance;
 	private IMethodFilter testMethodFilter;
 
@@ -595,12 +598,10 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	static public boolean isTestCase(IFile file) {
-		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
-		String testCaseClass = prefs.getTestFileSuperClass();
-		if (testCaseClass == null || "".equals(testCaseClass))
-			testCaseClass = PHPUNIT_TEST_CASE_CLASS;
-
-		return PHPToolkitUtil.hasSuperClass(file, testCaseClass);
+		boolean is = PHPToolkitUtil.hasSuperClass(file,
+				PHPUNIT_TESTCASE_PATTERN);
+		System.out.println(file + ": " + is);
+		return is;
 	}
 
 	static public boolean isTestSuite(IFile file) {
