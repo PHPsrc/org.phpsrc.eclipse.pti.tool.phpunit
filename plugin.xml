@@ -106,6 +106,21 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+		<menuContribution
+			locationURI="popup:org.phpsrc.eclipse.pti.tools.phpunit.ui.menus.phpunit?after=additions">
+			<command
+				commandId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+				tooltip="Run PHPUnit Test (without detection)"
+				icon="icons/full/obj16/testrun.gif">
+				<visibleWhen>
+					<with variable="activeMenuSelection">
+						<iterate>
+							<adapt type="org.eclipse.core.resources.IResource" />
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
 	
 	<extension
@@ -118,6 +133,11 @@
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
 			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Run PHPUnit Test">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Run PHPUnit Test (without detection)">
 		</command>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
@@ -162,6 +182,16 @@
 				tooltip="Toogle between the test case editor and test element editor"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
 				enablesFor="1">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithouDetectionAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+				label="Run PHPUnit Test (without detection)"
+				icon="icons/full/obj16/testrun.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Run selected PHPUnit Test (without detection)"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithoutDetectionAction"
+				enablesFor="+">
 			</action>
 			<action
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
