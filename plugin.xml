@@ -106,6 +106,21 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+		<menuContribution
+			locationURI="popup:org.phpsrc.eclipse.pti.tools.phpunit.ui.menus.phpunit?after=additions">
+			<command
+				commandId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+				tooltip="Run PHPUnit Test (without detection)"
+				icon="icons/full/obj16/testrun.gif">
+				<visibleWhen>
+					<with variable="activeMenuSelection">
+						<iterate>
+							<adapt type="org.eclipse.core.resources.IResource" />
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
 	
 	<extension
@@ -116,13 +131,28 @@
 		</category>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Run PHPUnit Test">
 		</command>
 		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Run PHPUnit Test (without detection)">
+		</command>
+		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
-			categoryId="org.phpsrc.eclipse.pti.tools.codesniffer.ui.commands"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Toggle Test Case / Test Element">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.rerunLast"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Rerun last test">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.syncclasses"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Synchronise Test Case / Test Element">
 		</command>
 	</extension>
 
@@ -134,14 +164,14 @@
 			label="PHPUnit"
 			visible="false">
 			<action
-				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
-				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
-				label="Run PHPUnit Test"
-				icon="icons/full/obj16/testrun.gif"
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.syncclasses"
+				label="Synchronise Test Case / Test Element"
+				icon="icons/full/obj16/synctestcase.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
-				tooltip="Run PHPUnit Test"
-				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
-				enablesFor="*">
+				tooltip="Synchronise new (test) methods from test case to test element or vice versa"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.SyncTestCaseAction"
+				enablesFor="1">
 			</action>
 			<action
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
@@ -149,9 +179,29 @@
 				label="Toggle Test Case / Test Element"
 				icon="icons/full/obj16/toggletestcasetestelement.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
-				tooltip="Toggle Test Case / Test Element"
+				tooltip="Toogle between the test case editor and test element editor"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.ToogleTestCaseTestElementAction"
-				enablesFor="*">
+				enablesFor="1">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithouDetectionAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
+				label="Run PHPUnit Test (without detection)"
+				icon="icons/full/obj16/testrun.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Run selected PHPUnit Test (without detection)"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithoutDetectionAction"
+				enablesFor="+">
+			</action>
+			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
+				label="Run PHPUnit Test"
+				icon="icons/full/obj16/testrun.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Run selected PHPUnit Test"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseAction"
+				enablesFor="+">
 			</action>
 		</actionSet>
 	</extension>
@@ -170,5 +220,49 @@
 			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
 			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
 		</perspectiveExtension>
+	</extension>     
+
+	<extension
+		id="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+		name="PHPUnit Code Coverage"
+		point="org.eclipse.core.resources.markers">
+		<persistent value="false"/>
+		<attribute name="lineNumber"/>
+		<attribute name="charStart"/>
+		<attribute name="charEnd"/>
+		<attribute name="message"/>
+		<attribute name="priority"/>
+		<attribute name="severity"/>
+		<super type="org.eclipse.core.resources.problemmarker"/>
+ 	</extension>
+
+	<extension point="org.eclipse.ui.editors.annotationTypes">
+		<type
+			name="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			markerType="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
+			markerSeverity="0">
+		</type>
+	</extension>
+	
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+		<specification
+			annotationType="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"
+			textPreferenceKey="highlight.text"
+			colorPreferenceKey="highlight.color"
+			highlightPreferenceKey="highlight.background"
+			textPreferenceValue="true"
+			textStylePreferenceValue="IBEAM"
+			overviewRulerPreferenceKey="highlight.rulers.overview"
+			presentationLayer="4"
+			label="PHPUnit Code Coverage"
+			colorPreferenceValue="223,228,238"
+			verticalRulerPreferenceValue="true"
+			overviewRulerPreferenceValue="true"
+			highlightPreferenceValue="true"
+			textStylePreferenceKey="highlight.text.style"
+			includeOnPreferencePage="true"
+			icon=""
+			quickFixIcon="">
+		</specification>
 	</extension>
 </plugin>
