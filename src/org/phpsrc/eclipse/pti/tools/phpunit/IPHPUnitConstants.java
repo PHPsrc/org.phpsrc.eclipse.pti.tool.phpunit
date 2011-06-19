@@ -11,13 +11,17 @@ package org.phpsrc.eclipse.pti.tools.phpunit;
 public interface IPHPUnitConstants {
 	public static final String PLUGIN_ID = PHPUnitPlugin.PLUGIN_ID;
 
-	public static final String PREFERENCE_PAGE_ID = PLUGIN_ID + ".preferences.PHPUnitPreferencePage"; //$NON-NLS-1$
-	public static final String PROJECT_PAGE_ID = PLUGIN_ID + ".properties.PHPUnitPreferencePage"; //$NON-NLS-1$
+	public static final String PREFERENCE_PAGE_ID = PLUGIN_ID
+			+ ".preferences.PHPUnitPreferencePage"; //$NON-NLS-1$
+	public static final String PROJECT_PAGE_ID = PLUGIN_ID
+			+ ".properties.PHPUnitPreferencePage"; //$NON-NLS-1$
 
 	public static final String VALIDATOR_PHPUNIT_MARKER = "org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitMarker"; //$NON-NLS-1$
+	public static final String VALIDATOR_PHPUNIT_CODE_COVERAGE_MARKER = "org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"; //$NON-NLS-1$
 
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_PROJECT = "%p";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_DIR = "%d";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILENAME = "%f";
+	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILENAME_LONG = "%ff";
 	public static final String TEST_FILE_PATTERN_PLACEHOLDER_FILE_EXTENSION = "%e";
 }

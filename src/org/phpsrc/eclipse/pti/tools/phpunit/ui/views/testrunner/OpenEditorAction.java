@@ -39,11 +39,13 @@ public abstract class OpenEditorAction extends Action {
 		this(testRunner, filePath, true);
 	}
 
-	public OpenEditorAction(TestRunnerViewPart testRunner, String filePath, boolean activate) {
+	public OpenEditorAction(TestRunnerViewPart testRunner, String filePath,
+			boolean activate) {
 		this(testRunner, PHPUnitPlugin.resolveProjectFile(filePath), activate);
 	}
 
-	public OpenEditorAction(TestRunnerViewPart testRunner, IFile file, boolean activate) {
+	public OpenEditorAction(TestRunnerViewPart testRunner, IFile file,
+			boolean activate) {
 		super(PHPUnitMessages.OpenEditorAction_action_label);
 		Assert.isNotNull(file);
 		Assert.isTrue(file.exists());
@@ -56,13 +58,16 @@ public abstract class OpenEditorAction extends Action {
 	 * @see IAction#run()
 	 */
 	public void run() {
-		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window = PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page = window.getActivePage();
-			IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(fFile.getName());
+			IEditorDescriptor desc = PlatformUI.getWorkbench()
+					.getEditorRegistry().getDefaultEditor(fFile.getName());
 
 			try {
-				IEditorPart editor = page.openEditor(new FileEditorInput(fFile), desc.getId());
+				IEditorPart editor = page.openEditor(
+						new FileEditorInput(fFile), desc.getId());
 				if (editor instanceof ITextEditor)
 					reveal((ITextEditor) editor);
 			} catch (PartInitException e) {

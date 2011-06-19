@@ -36,40 +36,76 @@ public class PHPUnitPreferencesFactory {
 	public static PHPUnitPreferences factory(IProject project) {
 		Preferences prefs = PHPUnitPlugin.getDefault().getPluginPreferences();
 
-		String phpExe = prefs.getString(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE);
-		boolean printOutput = prefs.getBoolean(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT);
-		String bootstrap = prefs.getString(PHPUnitPreferenceNames.PREF_BOOTSTRAP);
-		String testFilePatternFolder = prefs.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER);
-		String testFilePatternFile = prefs.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
-		String pearLibraryName = prefs.getString(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY);
-		String testFileSuperClass = prefs.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
+		String phpExe = prefs
+				.getString(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE);
+		boolean printOutput = prefs
+				.getBoolean(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT);
+		String bootstrap = prefs
+				.getString(PHPUnitPreferenceNames.PREF_BOOTSTRAP);
+		String testFilePatternFolder = prefs
+				.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER);
+		String sourceFilePatternFolder = prefs
+				.getString(PHPUnitPreferenceNames.PREF_SOURCE_FILE_PATTERN_FOLDER);
+		String testFilePatternFile = prefs
+				.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE);
+		String pearLibraryName = prefs
+				.getString(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY);
+		String testFileSuperClass = prefs
+				.getString(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS);
+		boolean generateCodeCoverage = prefs
+				.getBoolean(PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE);
+
+		boolean noNamespaceCheck = prefs
+				.getBoolean(PHPUnitPreferenceNames.PREF_NO_NAMESPACE_CHECK);
 
 		if (project != null) {
 			IScopeContext[] preferenceScopes = createPreferenceScopes(project);
 			if (preferenceScopes[0] instanceof ProjectScope) {
-				IEclipsePreferences node = preferenceScopes[0].getNode(PHPUnitPlugin.PLUGIN_ID);
+				IEclipsePreferences node = preferenceScopes[0]
+						.getNode(PHPUnitPlugin.PLUGIN_ID);
 				if (node != null) {
-					phpExe = node.get(PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE, phpExe);
-					printOutput = node.getBoolean(PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT, printOutput);
-					bootstrap = node.get(PHPUnitPreferenceNames.PREF_BOOTSTRAP, bootstrap);
-					testFilePatternFolder = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER,
-							testFilePatternFolder);
-					testFilePatternFile = node.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE,
+					phpExe = node.get(
+							PHPUnitPreferenceNames.PREF_PHP_EXECUTABLE, phpExe);
+					printOutput = node.getBoolean(
+							PHPUnitPreferenceNames.PREF_DEBUG_PRINT_OUTPUT,
+							printOutput);
+					bootstrap = node.get(PHPUnitPreferenceNames.PREF_BOOTSTRAP,
+							bootstrap);
+					testFilePatternFolder = node
+							.get(PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FOLDER,
+									testFilePatternFolder);
+					sourceFilePatternFolder = node
+							.get(PHPUnitPreferenceNames.PREF_SOURCE_FILE_PATTERN_FOLDER,
+									sourceFilePatternFolder);
+					testFilePatternFile = node.get(
+							PHPUnitPreferenceNames.PREF_TEST_FILE_PATTERN_FILE,
 							testFilePatternFile);
-					pearLibraryName = node.get(PHPUnitPreferenceNames.PREF_PEAR_LIBRARY, pearLibraryName);
-					testFileSuperClass = node
-							.get(PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS, testFileSuperClass);
+					pearLibraryName = node.get(
+							PHPUnitPreferenceNames.PREF_PEAR_LIBRARY,
+							pearLibraryName);
+					testFileSuperClass = node.get(
+							PHPUnitPreferenceNames.PREF_TEST_FILE_SUPER_CLASS,
+							testFileSuperClass);
+					generateCodeCoverage = node.getBoolean(
+							PHPUnitPreferenceNames.PREF_GENERATE_CODE_COVERAGE,
+							generateCodeCoverage);
+					noNamespaceCheck = node.getBoolean(
+							PHPUnitPreferenceNames.PREF_NO_NAMESPACE_CHECK,
+							noNamespaceCheck);
 				}
 			}
 		}
 
-		return new PHPUnitPreferences(phpExe, printOutput, pearLibraryName, bootstrap, testFilePatternFolder,
-				testFilePatternFile, testFileSuperClass);
+		return new PHPUnitPreferences(phpExe, printOutput, pearLibraryName,
+				bootstrap, testFilePatternFolder, sourceFilePatternFolder,
+				testFilePatternFile, testFileSuperClass, generateCodeCoverage,
+				noNamespaceCheck);
 	}
 
 	protected static IScopeContext[] createPreferenceScopes(IProject project) {
 		if (project != null) {
-			return new IScopeContext[] { new ProjectScope(project), new InstanceScope(), new DefaultScope() };
+			return new IScopeContext[] { new ProjectScope(project),
+					new InstanceScope(), new DefaultScope() };
 		}
 		return new IScopeContext[] { new InstanceScope(), new DefaultScope() };
 	}

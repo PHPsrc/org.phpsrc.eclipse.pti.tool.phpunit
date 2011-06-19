@@ -8,29 +8,13 @@
 
 package org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards;
 
-import java.io.InvalidClassException;
-import java.io.InvalidObjectException;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.dltk.core.search.IDLTKSearchScope;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.php.internal.ui.PHPUiConstants;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.part.FileEditorInput;
-import org.phpsrc.eclipse.pti.core.PHPToolCorePlugin;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnit;
-import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitException;
-import org.phpsrc.eclipse.pti.ui.Logger;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.PHPUnitUtil;
 
 @SuppressWarnings("restriction")
 public class CreatePHPClassWizard extends Wizard implements INewWizard {
@@ -46,34 +30,13 @@ public class CreatePHPClassWizard extends Wizard implements INewWizard {
 
 	public boolean performFinish() {
 		if (sourceClassPage.finish()) {
-			PHPUnit phpunit = PHPUnit.getInstance();
-			try {
-				try {
-					phpunit.createPHPClassSkeleton(sourceClassPage.getSourceClassName(), sourceClassPage
-							.getSourceClassFile(), sourceClassPage.getTestClassName(), sourceClassPage
-							.getPHPClassFilePath(), sourceClassPage.getPHPClassSuperClass());
-
-					Path path = new Path(sourceClassPage.getPHPClassFilePath());
-					IFile testFile = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-					IEditorInput editorInput = new FileEditorInput(testFile);
-					IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-					IWorkbenchPage page = window.getActivePage();
-					page.openEditor(editorInput, PHPUiConstants.PHP_EDITOR_ID);
-
-					return true;
-				} catch (PHPUnitException e) {
-					MessageDialog.openError(PHPToolCorePlugin.getActiveWorkbenchShell(), "Failed creating PHP Class", e
-							.getMessage());
-				}
-			} catch (InvalidObjectException e) {
-				Logger.logException(e);
-			} catch (CoreException e) {
-				Logger.logException(e);
-			} catch (InvalidClassException e) {
-				Logger.logException(e);
-			}
+			return PHPUnitUtil.syncTestCaseToPHPClass(
+					sourceClassPage.getSourceClassName(),
+					sourceClassPage.getSourceClassFile(),
+					sourceClassPage.getPHPClassName(),
+					sourceClassPage.getPHPClassFilePath(),
+					sourceClassPage.getPHPClassSuperClass());
 		}
-
 		return false;
 	}
 
