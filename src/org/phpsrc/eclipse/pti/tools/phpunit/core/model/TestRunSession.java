@@ -474,19 +474,18 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	private TestElement addTreeEntry(String treeEntry) {
-		// format: testId","testName","isSuite","testcount
-		int index0 = treeEntry.indexOf(',');
-		String id = treeEntry.substring(0, index0);
+		// format: testId<,>testName<,>isSuite<,>testcount
+		String[] params=treeEntry.split(JsonTestRunnerClient.PARAM_SEP);
+		int i=0;
+		
+		String id = params[i++].trim();
 
-		StringBuffer testNameBuffer = new StringBuffer(100);
-		int index1 = scanTestName(treeEntry, index0 + 1, testNameBuffer);
-		String testName = testNameBuffer.toString().trim();
+		String testName = params[i++].trim();
 
-		int index2 = treeEntry.indexOf(',', index1 + 1);
-		boolean isSuite = treeEntry.substring(index1 + 1, index2).equals("true"); //$NON-NLS-1$
+		boolean isSuite = params[i++].trim().equals("true"); //$NON-NLS-1$
 
-		int testCount = Integer.parseInt(treeEntry.substring(index2 + 1));
-
+		int testCount = Integer.parseInt(params[i++].trim());
+		
 		if (fIncompleteTestSuites.isEmpty()) {
 			return createTestElement(fTestRoot, id, testName, isSuite, testCount);
 		} else {

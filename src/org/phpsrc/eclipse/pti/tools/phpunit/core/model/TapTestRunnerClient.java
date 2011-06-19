@@ -26,7 +26,7 @@ public class TapTestRunnerClient extends AbstractTestRunnerClient {
 				String testName = m.group(5);
 
 				for (ITestRunListener listener : fListeners) {
-					listener.testTreeEntry(testId + "," + testName + ",false,0");
+					listener.testTreeEntry(testId + JsonTestRunnerClient.PARAM_SEP + testName + JsonTestRunnerClient.PARAM_SEP+"false"+JsonTestRunnerClient.PARAM_SEP+"0");
 
 					listener.testStarted(testId, testName);
 					if (!ok) {
