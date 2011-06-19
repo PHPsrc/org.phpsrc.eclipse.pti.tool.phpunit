@@ -111,7 +111,7 @@
 			<command
 				commandId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
 				tooltip="Run PHPUnit Test (without detection)"
-				icon="icons/full/obj16/testrun.gif">
+				icon="icons/full/obj16/testrunwithoutdetection.gif">
 				<visibleWhen>
 					<with variable="activeMenuSelection">
 						<iterate>
@@ -187,7 +187,7 @@
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithouDetectionAction"
 				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
 				label="Run PHPUnit Test (without detection)"
-				icon="icons/full/obj16/testrun.gif"
+				icon="icons/full/obj16/testrunwithoutdetection.gif"
 				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
 				tooltip="Run selected PHPUnit Test (without detection)"
 				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithoutDetectionAction"
