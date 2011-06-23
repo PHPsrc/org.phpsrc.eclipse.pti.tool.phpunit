@@ -318,7 +318,7 @@ public abstract class TestElement implements ITestElement {
 		return extractClassName(getTestName());
 	}
 
-	private static String extractClassName(String testNameString) {
+	protected static String extractClassName(String testNameString) {
 		testNameString = extractRawClassName(testNameString);
 		testNameString = testNameString.replace('$', '.'); // see bug 178503
 		int index = testNameString.indexOf("::");

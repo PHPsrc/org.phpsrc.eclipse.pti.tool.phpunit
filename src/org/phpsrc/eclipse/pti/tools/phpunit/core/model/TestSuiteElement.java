@@ -14,12 +14,14 @@ package org.phpsrc.eclipse.pti.tools.phpunit.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestSuiteElement extends TestElement implements ITestSuiteElement {
+public class TestSuiteElement extends TestElement implements ITestCaseElement,
+		ITestSuiteElement {
 
 	private List/* <TestElement> */fChildren;
 	private Status fChildrenStatus;
 
-	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount) {
+	public TestSuiteElement(TestSuiteElement parent, String id,
+			String testName, int childrenCount) {
 		super(parent, id, testName);
 		fChildren = new ArrayList(childrenCount);
 	}
@@ -38,11 +40,30 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	}
 
 	public String getSuiteTypeName() {
+		String testName = getTestName();
+
+		int index = testName.indexOf("::");
+		if (index >= 0) {
+			return testName.substring(index + 2);
+		}
+
 		return getClassName();
 	}
 
+	public String getTestMethodName() {
+		String testName = getTestName();
+
+		int index = testName.indexOf("::");
+		if (index >= 0) {
+			return testName.substring(index + 2);
+		}
+
+		return null;
+	}
+
 	public ITestElement[] getChildren() {
-		return (ITestElement[]) fChildren.toArray(new ITestElement[fChildren.size()]);
+		return (ITestElement[]) fChildren.toArray(new ITestElement[fChildren
+				.size()]);
 	}
 
 	public void addChild(TestElement child) {
@@ -61,7 +82,8 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	}
 
 	private Status getCumulatedStatus() {
-		TestElement[] children = (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]); // copy
+		TestElement[] children = (TestElement[]) fChildren
+				.toArray(new TestElement[fChildren.size()]); // copy
 		// list
 		// to
 		// avoid
@@ -153,4 +175,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		return "TestSuite: " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
+	public String getTestClassName() {
+		return getClassName();
+	}
 }

@@ -23,7 +23,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	}
 
 	public String getTestMethodName() {
-		String testName = getTestName();
+		String testName = super.getTestName();
 		int index = testName.indexOf('(');
 		if (index > 0)
 			return testName.substring(0, index);

@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
+import org.phpsrc.eclipse.pti.tools.phpunit.core.model.ITestCaseElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestCaseElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement;
 import org.phpsrc.eclipse.pti.tools.phpunit.core.model.TestElement.Status;
@@ -203,14 +204,11 @@ public class TestViewer {
 					TestElement testElement = (TestElement) selection
 							.getFirstElement();
 
-					if (testElement instanceof TestSuiteElement) {
-						String testLabel = testElement.getTestName();
-						OpenTestAction action = new OpenTestAction(
-								fTestRunnerPart, testLabel);
-						action.run();
-					} else if (testElement instanceof TestCaseElement) {
+					if (testElement instanceof ITestCaseElement) {
 
-						TestCaseElement testCaseElement = (TestCaseElement) testElement;
+						ITestCaseElement testCaseElement = (ITestCaseElement) testElement;
+						System.out.println(testCaseElement.getTestClassName());
+						System.out.println(testCaseElement.getTestMethodName());
 						OpenTestAction action = new OpenTestAction(
 								fTestRunnerPart, testCaseElement);
 						action.run();

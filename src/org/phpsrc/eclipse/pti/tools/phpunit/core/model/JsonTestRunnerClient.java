@@ -29,6 +29,8 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 	private static final String EVENT_TEST = "test"; //$NON-NLS-1$
 	private static final String EVENT_TESTSTART = "testStart"; //$NON-NLS-1$
 
+	public static final String PARAM_SEP = "<,>";
+
 	private StringBuilder outputCache;
 	private StringBuilder jsonOutputCache;
 	private boolean testRunStarted = false;
@@ -80,6 +82,7 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 
 	private void parseJson(String json) {
 		try {
+			System.out.println(json);
 			JSONObject jsonObj = new JSONObject(json);
 			if (jsonObj.has(KEY_EVENT)) {
 
@@ -92,7 +95,8 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 						}
 
 						listener.testTreeEntry(jsonObj.getString(KEY_SUITE)
-								+ "," + jsonObj.getString(KEY_SUITE) + ",true,"
+								+ PARAM_SEP + jsonObj.getString(KEY_SUITE)
+								+ PARAM_SEP + "true" + PARAM_SEP
 								+ jsonObj.getInt(KEY_TESTS));
 					}
 				} else if (EVENT_TESTSTART.equals(event)) {
@@ -141,7 +145,8 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 	}
 
 	private void startTest(ITestRunListener listener, String key) {
-		listener.testTreeEntry(key + "," + key + ",false,0");
+		listener.testTreeEntry(key + PARAM_SEP + key + PARAM_SEP + "false"
+				+ PARAM_SEP + "0");
 		listener.testStarted(key, key);
 	}
 
