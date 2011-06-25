@@ -37,4 +37,11 @@ public interface ITestCaseElement extends ITestElement {
 	 */
 	public String getTestClassName();
 
+	/**
+	 * Returns the test data.
+	 * 
+	 * @return returns the test data.
+	 */
+	public String getTestData();
+
 }

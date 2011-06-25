@@ -82,7 +82,6 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 
 	private void parseJson(String json) {
 		try {
-			System.out.println(json);
 			JSONObject jsonObj = new JSONObject(json);
 			if (jsonObj.has(KEY_EVENT)) {
 

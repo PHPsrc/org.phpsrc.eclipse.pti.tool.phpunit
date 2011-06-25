@@ -207,8 +207,6 @@ public class TestViewer {
 					if (testElement instanceof ITestCaseElement) {
 
 						ITestCaseElement testCaseElement = (ITestCaseElement) testElement;
-						System.out.println(testCaseElement.getTestClassName());
-						System.out.println(testCaseElement.getTestMethodName());
 						OpenTestAction action = new OpenTestAction(
 								fTestRunnerPart, testCaseElement);
 						action.run();

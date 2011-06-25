@@ -23,21 +23,39 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	}
 
 	public String getTestMethodName() {
-		String testName = super.getTestName();
-		int index = testName.indexOf('(');
+		String testName = getTestName();
+		int index = -1;
+
+		index = testName.indexOf('(');
 		if (index > 0)
-			return testName.substring(0, index);
+			testName = testName.substring(0, index);
+
 		index = testName.indexOf('@');
 		if (index > 0)
-			return testName.substring(0, index);
+			testName = testName.substring(0, index);
+
 		index = testName.indexOf("::");
 		if (index > 0)
-			return testName.substring(index + 2);
+			testName = testName.substring(index + 2);
+
+		index = testName.indexOf(' ');
+		if (index > 0)
+			testName = testName.substring(0, index);
+
 		return testName;
 	}
 
 	public String getTestClassName() {
 		return getClassName();
+	}
+
+	public String getTestData() {
+		String testName = getTestName();
+		int index = testName.indexOf(' ');
+		if (index > 0)
+			return testName.substring(index + 1);
+
+		return null;
 	}
 
 	public void setIgnored(boolean ignored) {

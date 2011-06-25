@@ -319,11 +319,11 @@ public abstract class TestElement implements ITestElement {
 	}
 
 	protected static String extractClassName(String testNameString) {
-		testNameString = extractRawClassName(testNameString);
-		testNameString = testNameString.replace('$', '.'); // see bug 178503
 		int index = testNameString.indexOf("::");
 		if (index > 0)
 			return testNameString.substring(0, index);
+		testNameString = extractRawClassName(testNameString);
+		testNameString = testNameString.replace('$', '.'); // see bug 178503
 		return testNameString;
 	}
 

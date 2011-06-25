@@ -178,4 +178,8 @@ public class TestSuiteElement extends TestElement implements ITestCaseElement,
 	public String getTestClassName() {
 		return getClassName();
 	}
+
+	public String getTestData() {
+		return null;
+	}
 }
