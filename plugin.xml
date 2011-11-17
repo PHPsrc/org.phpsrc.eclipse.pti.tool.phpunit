@@ -121,13 +121,28 @@
 				</visibleWhen>
 			</command>
 		</menuContribution>
+		<menuContribution
+			locationURI="popup:org.phpsrc.eclipse.pti.tools.phpunit.ui.menus.phpunit?after=additions">
+			<command
+				commandId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithcodecoverage"
+				tooltip="Run PHPUnit Test with Code Coverage"
+				icon="icons/full/obj16/testrunwithcodecoverage.gif">
+				<visibleWhen>
+					<with variable="activeMenuSelection">
+						<iterate>
+							<adapt type="org.eclipse.core.resources.IResource" />
+						</iterate>
+					</with>
+				</visibleWhen>
+			</command>
+		</menuContribution>
 	</extension>
-	
+
 	<extension
 		point="org.eclipse.ui.commands">
-		<category 
+		<category
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
-			name="PHPUnit"> 
+			name="PHPUnit">
 		</category>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtest"
@@ -138,6 +153,11 @@
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
 			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
 			name="Run PHPUnit Test (without detection)">
+		</command>
+		<command
+			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithcodecoverage"
+			categoryId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands"
+			name="Run PHPUnit Test with Code Coverage">
 		</command>
 		<command
 			id="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.toggletestcasetestelement"
@@ -184,6 +204,16 @@
 				enablesFor="1">
 			</action>
 			<action
+				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithCodeCoverageAction"
+				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithcodecoverage"
+				label="Run PHPUnit Test with Code Coverage"
+				icon="icons/full/obj16/testrunwithcodecoverage.gif"
+				toolbarPath="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet"
+				tooltip="Run selected PHPUnit Test with Code Coverage"
+				class="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithCodeCoverageAction"
+				enablesFor="+">
+			</action>
+			<action
 				id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actions.RunTestCaseWithouDetectionAction"
 				definitionId="org.phpsrc.eclipse.pti.tools.phpunit.ui.commands.runtestwithoutdetection"
 				label="Run PHPUnit Test (without detection)"
@@ -212,7 +242,7 @@
 			class="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner.TestRunnerViewPart"
 			icon="icons/full/eview16/phpunit.gif" />
 	</extension>
-	
+
 	<extension point="org.eclipse.ui.perspectiveExtensions">
 		<perspectiveExtension targetID="org.eclipse.php.perspective">
 			<newWizardShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.wizards.CreatePHPUnitTestCaseWizard" />
@@ -220,7 +250,7 @@
 			<actionSet id="org.phpsrc.eclipse.pti.tools.phpunit.ui.actionSet" />
 			<viewShortcut id="org.phpsrc.eclipse.pti.tools.phpunit.ui.views.testrunner" />
 		</perspectiveExtension>
-	</extension>     
+	</extension>
 
 	<extension
 		id="org.phpsrc.eclipse.pti.tools.phpunit.validator.phpToolPHPUnitCodeCoverageMarker"
@@ -243,7 +273,7 @@
 			markerSeverity="0">
 		</type>
 	</extension>
-	
+
 	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
 		<specification
 			annotationType="org.phpsrc.eclipse.pti.tools.phpunit.codecoverage"

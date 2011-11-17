@@ -26,9 +26,11 @@ import org.phpsrc.eclipse.pti.ui.Logger;
 
 public class PHPUnitValidator extends AbstractValidator {
 
-	public ValidationResult validate(IResource resource, int kind, ValidationState state, IProgressMonitor monitor) {
+	public ValidationResult validate(IResource resource, int kind,
+			ValidationState state, IProgressMonitor monitor) {
 		// process only PHP files
-		if (resource.getType() != IResource.FILE || !(PHPToolkitUtil.isPhpFile((IFile) resource))) {
+		if (resource.getType() != IResource.FILE
+				|| !(PHPToolkitUtil.isPhpFile((IFile) resource))) {
 			return null;
 		}
 
@@ -40,39 +42,59 @@ public class PHPUnitValidator extends AbstractValidator {
 	}
 
 	public ValidationResult validateTestCase(IFile file) {
+		return validateTestCase(file, false);
+	}
+
+	public ValidationResult validateTestCase(IFile file,
+			boolean forceCodeCoverage) {
 		// remove the markers currently existing for this resource
 		// in case of project/folder, the markers are deleted recursively
 		try {
-			file.deleteMarkers(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER, false, IResource.DEPTH_INFINITE);
+			file.deleteMarkers(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER,
+					false, IResource.DEPTH_INFINITE);
 		} catch (CoreException e) {
 		}
 
 		PHPUnit phpunit = PHPUnit.getInstance();
-		return createFileMarker(phpunit.runTestCase(file));
+		return createFileMarker(phpunit.runTestCase(file, forceCodeCoverage));
 	}
 
 	public ValidationResult validateTestSuite(IFile file) {
+		return validateTestSuite(file, false);
+	}
+
+	public ValidationResult validateTestSuite(IFile file,
+			boolean forceCodeCoverage) {
 		// remove the markers currently existing for this resource
 		// in case of project/folder, the markers are deleted recursively
 		try {
-			file.getParent().deleteMarkers(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER, false, IResource.DEPTH_INFINITE);
+			file.getParent().deleteMarkers(
+					IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER, false,
+					IResource.DEPTH_INFINITE);
 		} catch (CoreException e) {
 		}
 
 		PHPUnit phpunit = PHPUnit.getInstance();
-		return createFileMarker(phpunit.runTestSuite(file));
+		return createFileMarker(phpunit.runTestSuite(file, forceCodeCoverage));
 	}
 
 	public ValidationResult validateFolder(IFolder folder) {
+		return validateFolder(folder, false);
+	}
+
+	public ValidationResult validateFolder(IFolder folder,
+			boolean forceCodeCoverage) {
 		// remove the markers currently existing for this resource
 		// in case of project/folder, the markers are deleted recursively
 		try {
-			folder.deleteMarkers(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER, false, IResource.DEPTH_INFINITE);
+			folder.deleteMarkers(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER,
+					false, IResource.DEPTH_INFINITE);
 		} catch (CoreException e) {
 		}
 
 		PHPUnit phpunit = PHPUnit.getInstance();
-		return createFileMarker(phpunit.runAllTestsInFolder(folder));
+		return createFileMarker(phpunit.runAllTestsInFolder(folder,
+				forceCodeCoverage));
 	}
 
 	protected ValidationResult createFileMarker(IProblem[] problems) {
@@ -81,18 +103,23 @@ public class PHPUnitValidator extends AbstractValidator {
 			IFile file = ((FileProblem) problem).getOriginatingFile();
 
 			try {
-				IMarker marker = file.createMarker(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER);
+				IMarker marker = file
+						.createMarker(IPHPUnitConstants.VALIDATOR_PHPUNIT_MARKER);
 				marker.setAttribute(IMarker.PROBLEM, true);
-				marker.setAttribute(IMarker.LINE_NUMBER, problem.getSourceLineNumber());
+				marker.setAttribute(IMarker.LINE_NUMBER,
+						problem.getSourceLineNumber());
 
 				if (problem.isWarning()) {
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
+					marker.setAttribute(IMarker.SEVERITY,
+							IMarker.SEVERITY_WARNING);
 					result.incrementWarning(1);
 				} else {
-					marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+					marker.setAttribute(IMarker.SEVERITY,
+							IMarker.SEVERITY_ERROR);
 					result.incrementError(1);
 				}
-				marker.setAttribute(IMarker.CHAR_START, problem.getSourceStart());
+				marker.setAttribute(IMarker.CHAR_START,
+						problem.getSourceStart());
 				marker.setAttribute(IMarker.CHAR_END, problem.getSourceEnd());
 				marker.setAttribute(IMarker.MESSAGE, problem.getMessage());
 			} catch (CoreException e) {

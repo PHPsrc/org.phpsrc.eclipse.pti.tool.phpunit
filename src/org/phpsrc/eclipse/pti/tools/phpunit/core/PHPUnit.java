@@ -225,12 +225,14 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	public IProblem[] runTestCase(final IFile testFile) {
+		return runTestCase(testFile, false);
+	}
+
+	public IProblem[] runTestCase(final IFile testFile,
+			boolean forceCodeCoverage) {
 		try {
 			PHPUnitPreferences prefs = PHPUnitPreferencesFactory
 					.factory(testFile);
-
-			// final File summaryFile =
-			// createTempSummaryFile(PHPUNIT_SUMMARY_FILE);
 
 			ISourceModule module = PHPToolkitUtil.getSourceModule(testFile);
 			IType[] types = module.getAllTypes();
@@ -238,7 +240,7 @@ public class PHPUnit extends AbstractPHPTool {
 				String cmdLineArgs = "--log-json php://stdout";
 
 				File coverageFile = null;
-				if (prefs.generateCodeCoverage()) {
+				if (forceCodeCoverage || prefs.generateCodeCoverage()) {
 					coverageFile = new File(
 							PHPUnitPlugin.getCodeCoverageDirectory(),
 							testFile.getName() + ".xml");
@@ -314,6 +316,11 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	public IProblem[] runAllTestsInFolder(IFolder folder) {
+		return runAllTestsInFolder(folder, false);
+	}
+
+	public IProblem[] runAllTestsInFolder(IFolder folder,
+			boolean forceCodeCoverage) {
 
 		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(folder);
 
@@ -321,7 +328,7 @@ public class PHPUnit extends AbstractPHPTool {
 				.getLocation().toOSString());
 
 		File coverageFile = null;
-		if (prefs.generateCodeCoverage()) {
+		if (forceCodeCoverage || prefs.generateCodeCoverage()) {
 			coverageFile = new File(PHPUnitPlugin.getCodeCoverageDirectory(),
 					folder.getName() + ".xml");
 			cmdLineArgs = " --coverage-clover "
@@ -350,6 +357,10 @@ public class PHPUnit extends AbstractPHPTool {
 	}
 
 	public IProblem[] runTestSuite(IFile file) {
+		return runTestSuite(file, false);
+	}
+
+	public IProblem[] runTestSuite(IFile file, boolean forceCodeCoverage) {
 		PHPUnitPreferences prefs = PHPUnitPreferencesFactory.factory(file);
 
 		String cmdLineArgs = OperatingSystem.escapeShellFileArg(file
@@ -358,7 +369,7 @@ public class PHPUnit extends AbstractPHPTool {
 		cmdLineArgs = "--log-json php://stdout " + cmdLineArgs;
 
 		File coverageFile = null;
-		if (prefs.generateCodeCoverage()) {
+		if (forceCodeCoverage || prefs.generateCodeCoverage()) {
 			coverageFile = new File(PHPUnitPlugin.getCodeCoverageDirectory(),
 					file.getName() + ".xml");
 			cmdLineArgs = " --coverage-clover "
