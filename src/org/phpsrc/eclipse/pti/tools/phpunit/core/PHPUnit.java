@@ -76,7 +76,7 @@ public class PHPUnit extends AbstractPHPTool {
 	private final static String PHPUNIT_SUMMARY_FILE = "phpunit.xml"; //$NON-NLS-1$
 
 	private final static Pattern PHPUNIT_TESTCASE_PATTERN = Pattern
-			.compile("PHPUnit_.+_TestCase");
+			.compile("PHPUnit_.+_[A-Za-z]*TestCase");
 
 	private static PHPUnit instance;
 	private IMethodFilter testMethodFilter;
