@@ -138,7 +138,6 @@ public class JsonTestRunnerClient extends AbstractTestRunnerClient {
 				}
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
 			Logger.logException(e);
 		}
 	}
