@@ -165,11 +165,11 @@ public class PHPUnit extends AbstractPHPTool {
 					oldClass.getElementName());
 		}
 
-		String cmdLineArgs = "--" + skeletonOption + " " + className;
+		String cmdLineArgs = "--" + skeletonOption + " '" + className + "'";
 		cmdLineArgs += " "
 				+ OperatingSystem.escapeShellFileArg(classFile.getLocation()
 						.toOSString());
-		cmdLineArgs += " " + targetClassName;
+		cmdLineArgs += " '" + targetClassName + "'";
 		cmdLineArgs += " "
 				+ OperatingSystem.escapeShellFileArg(testClassLocation);
 
